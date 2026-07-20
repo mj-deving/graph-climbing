@@ -4,6 +4,8 @@ A small, runtime-neutral protocol for long-running agentic engineering.
 
 The runtime is a loop. The work is a graph. Graph Climbing gives an engineering agent wide implementation freedom while tying completion to durable done criteria and inspectable evidence.
 
+Want the protocol as one copy-paste file? Use the [Graph Climbing Gist](https://gist.github.com/mj-deving/b4060f1188a747caf38d0da5c8a7b332).
+
 ```mermaid
 flowchart LR
   S[Durable spec] --> F[Reachable frontier]
