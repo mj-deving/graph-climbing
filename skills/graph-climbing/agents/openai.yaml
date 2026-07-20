@@ -1,0 +1,4 @@
+interface:
+  display_name: "Graph Climbing"
+  short_description: "Bootstrap, audit, and reconcile work graphs"
+  default_prompt: "Use $graph-climbing to bootstrap a durable work graph in this repository."

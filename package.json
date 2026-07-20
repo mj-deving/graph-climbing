@@ -1,0 +1,10 @@
+{
+  "name": "graph-climbing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "graph-check": "bun skills/graph-climbing/scripts/graph-check.ts",
+    "test": "bun test"
+  }
+}

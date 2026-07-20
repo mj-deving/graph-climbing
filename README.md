@@ -1,0 +1,101 @@
+# Graph Climbing
+
+A small, runtime-neutral protocol for long-running agentic engineering.
+
+The runtime is a loop. The work is a graph. Graph Climbing gives an engineering agent wide implementation freedom while tying completion to durable done criteria and inspectable evidence.
+
+```mermaid
+flowchart LR
+  S[Durable spec] --> F[Reachable frontier]
+  F --> V[Bounded vertical]
+  V --> P[Claim-matched probes]
+  P --> E[Evidence]
+  E --> R[Reconcile durable truth]
+  R --> F
+  G[Optional ledger] -. ownership and gates .-> F
+```
+
+```text
+derive reachable frontier
+→ choose one bounded vertical
+→ build and falsify
+→ reconcile durable truth
+→ derive again
+```
+
+## Start in sixty seconds
+
+For an existing repository, give [`GRAPH-CLIMBING.md`](GRAPH-CLIMBING.md) to the coding agent and say:
+
+```text
+Adopt this protocol using the repository's existing artifacts.
+Do not install an orchestration platform.
+Report the authority map, active frontier, selected slice, and first probe before building.
+```
+
+For a repository without a durable product specification:
+
+1. Copy [`starter/SPEC.md`](starter/SPEC.md) to the repository root.
+2. Give the agent [`starter/START.md`](starter/START.md).
+3. From the adopting repository, run `bun /absolute/path/to/graph-climbing/skills/graph-climbing/scripts/graph-check.ts SPEC.md` after the agent fills the spec.
+
+When working inside this kit checkout, use `bun run graph-check <path-to-spec>` instead.
+
+The repository also contains an optional [`graph-climbing` skill](skills/graph-climbing/SKILL.md) for bootstrap, audit, and reconciliation. The protocol does not depend on a skill loader.
+
+## Smallest useful stack
+
+```text
+one durable spec + existing tests and Git + one agent
+```
+
+The durable spec can be `SPEC.md`, an ISA, or another repository-native authority that preserves stable claims, dependencies, falsifying probes, status, decisions, and evidence.
+
+Add one operational ledger only when work must survive many sessions, external gates, or concurrent writers. Beads, GitHub Issues, and similar trackers can fill that role; none is required.
+
+## Repository contents
+
+- [`GRAPH-CLIMBING.md`](GRAPH-CLIMBING.md): canonical, standalone protocol and copy-paste prompt.
+- [`starter/SPEC.md`](starter/SPEC.md): neutral ISA-inspired specification scaffold.
+- [`starter/CLAIM-CHECKLIST.md`](starter/CLAIM-CHECKLIST.md): atomicity and falsification checks.
+- [`skills/graph-climbing`](skills/graph-climbing/SKILL.md): optional portable skill.
+- `graph-check`: deterministic internal-consistency checker.
+- [`examples/notes-cli`](examples/notes-cli/README.md): complete small example.
+- [`case-studies/dacs-agent-template.md`](case-studies/dacs-agent-template.md): evidence-bounded origin case.
+
+## Check a spec
+
+Requires [Bun](https://bun.sh/). No package dependencies.
+
+```bash
+bun run graph-check examples/notes-cli/SPEC.md
+bun test
+```
+
+`graph-check` verifies mechanical consistency: IDs, dependency references and cycles, probes, evidence requirements, slice-to-claim mappings, current-slice reachability, and the derived active frontier. It cannot certify product correctness or semantic claim quality. Named product probes remain the authority for those claims.
+
+## Spec as eval surface
+
+The spec defines the eval surface. Fixtures instantiate it. Evidence decides completion.
+
+Done criteria name the behaviors and failure boundaries that matter. Fixtures, adversarial cases, upstream snapshots, and runtime observations turn those claims into concrete evaluations. Tests and verifiers execute them. A spec without representative cases and falsifying probes is therefore not yet an adequate eval system.
+
+## Adoption boundary
+
+Graph Climbing is not:
+
+- an agent runtime or scheduler;
+- a second task tracker;
+- a required ISA or Beads installation;
+- a hook, daemon, dashboard, or continuous supervisor;
+- an automatic completion authority.
+
+The graph is a derived view over durable product truth, optional execution state, and evidence. Guardrails bound product work; they do not become the product.
+
+## Status
+
+Experimental v0.1 reference implementation. The protocol is grounded in one substantial engineering case and source-blind bootstrap probes, but general productivity claims require more unrelated projects.
+
+## License
+
+MIT
