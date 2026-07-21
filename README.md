@@ -2,23 +2,23 @@
 
 A small, runtime-neutral protocol for long-running agentic engineering.
 
-The runtime is a loop. The work is a graph. Graph Climbing gives an engineering agent wide implementation freedom while tying completion to durable done criteria and inspectable evidence.
+The runtime is a loop. The work is a graph. Graph Climbing gives an engineering agent wide implementation freedom while tying completion to durable claims and snapshot-bound evidence.
 
 Want the protocol as one copy-paste file? Use the [Graph Climbing Gist](https://gist.github.com/mj-deving/b4060f1188a747caf38d0da5c8a7b332).
 
 ```mermaid
 flowchart LR
-  S[Durable spec] --> F[Reachable frontier]
+  S[Claim graph] --> F[Claim frontier]
   F --> V[Bounded vertical]
   V --> P[Claim-matched probes]
   P --> E[Evidence]
   E --> R[Reconcile durable truth]
   R --> F
-  G[Optional ledger] -. ownership and gates .-> F
+  G[Optional execution graph] -. verticals, ownership, gates .-> F
 ```
 
 ```text
-derive reachable frontier
+derive claim frontier
 → choose one bounded vertical
 → build and falsify
 → reconcile durable truth
@@ -32,14 +32,14 @@ For an existing repository, give [`GRAPH-CLIMBING.md`](GRAPH-CLIMBING.md) to the
 ```text
 Adopt this protocol using the repository's existing artifacts.
 Do not install an orchestration platform.
-Report the authority map, active frontier, selected slice, and first probe before building.
+Report the authority map, claim frontier, frontier kind, active frontier, selected vertical, and first probe before building.
 ```
 
 For a repository without a durable product specification:
 
 1. Copy [`starter/SPEC.md`](starter/SPEC.md) to the repository root.
 2. Give the agent [`starter/START.md`](starter/START.md).
-3. From the adopting repository, run `bun /absolute/path/to/graph-climbing/skills/graph-climbing/scripts/graph-check.ts SPEC.md` after the agent fills the spec.
+3. From the adopting repository, run `bun /absolute/path/to/graph-climbing/skills/graph-climbing/scripts/graph-check.ts SPEC.md` after the agent fills the claim-first spec.
 
 When working inside this kit checkout, use `bun run graph-check <path-to-spec>` instead.
 
@@ -53,7 +53,7 @@ one durable spec + existing tests and Git + one agent
 
 The durable spec can be `SPEC.md`, an ISA, or another repository-native authority that preserves stable claims, dependencies, falsifying probes, status, decisions, and evidence.
 
-Add one operational ledger only when work must survive many sessions, external gates, or concurrent writers. Beads, GitHub Issues, and similar trackers can fill that role; none is required.
+Add an Execution Graph and one operational ledger only when work must survive long runs, external gates, or concurrent writers. Beads, GitHub Issues, and similar trackers can fill the ledger role; none is required.
 
 ## Repository contents
 
@@ -64,6 +64,7 @@ Add one operational ledger only when work must survive many sessions, external g
 - `graph-check`: deterministic internal-consistency checker.
 - [`examples/notes-cli`](examples/notes-cli/README.md): complete small example.
 - [`case-studies/dacs-agent-template.md`](case-studies/dacs-agent-template.md): evidence-bounded origin case.
+- [`conformance/dogfood/2026-07-21-v2.md`](conformance/dogfood/2026-07-21-v2.md): source-blind V2 scenario and CLI evidence.
 
 ## Check a spec
 
@@ -74,7 +75,7 @@ bun run graph-check examples/notes-cli/SPEC.md
 bun test
 ```
 
-`graph-check` verifies mechanical consistency: IDs, dependency references and cycles, probes, evidence requirements, slice-to-claim mappings, current-slice reachability, and the derived active frontier. It cannot certify product correctness or semantic claim quality. Named product probes remain the authority for those claims.
+`graph-check` verifies mechanical consistency: IDs, dependency references and cycles, probes, evidence requirements, optional vertical-to-claim mappings, current-slice reachability, parallel scope isolation, and derived frontiers. Its report includes `claimFrontier`, `frontierKind`, and the compatible `activeFrontier`. It cannot certify product correctness or semantic claim quality. Named product probes remain the authority for those claims.
 
 ## Spec as eval surface
 
@@ -96,7 +97,7 @@ The graph is a derived view over durable product truth, optional execution state
 
 ## Status
 
-Experimental v0.1 reference implementation. The protocol is grounded in one substantial engineering case and source-blind bootstrap probes, but general productivity claims require more unrelated projects.
+Experimental v0.2 reference implementation. The protocol is grounded in one substantial engineering case and bounded source-blind probes, but general productivity claims require more unrelated projects.
 
 ## License
 

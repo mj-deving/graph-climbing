@@ -1,280 +1,164 @@
 # Graph Climbing
 
-A small protocol for long-running agentic engineering.
+A compact protocol for long-running agentic engineering. Paste this file into a coding agent or point the agent at it. The reference kit, checker, examples, and origin evidence are at [mj-deving/graph-climbing](https://github.com/mj-deving/graph-climbing).
 
-This is an idea file designed to be pasted into a coding agent. The agent instantiates the protocol with the repository's native artifacts and the human's intent.
+## 1. Thesis
 
-Reference implementation, starter spec, checker, skill, examples, and evidence: [mj-deving/graph-climbing](https://github.com/mj-deving/graph-climbing).
+The runtime is a loop; the work is a graph. Real engineering contains prerequisites, independent branches, external gates, reopened truths, and convergence points. A linear plan hides that shape and decays as evidence changes.
 
-The agent gets wide freedom over implementation. Completion stays tied to a durable definition of done and inspectable evidence.
-
-## The problem
-
-An engineering agent may run the same loop for hours:
+Graph Climbing gives an agent wide freedom inside one bounded unit of product work while keeping completion tied to durable claims and snapshot-bound evidence. The minimal system is:
 
 ```text
-inspect → plan → build → test → review → repeat
+one product authority + existing tests and Git + one agent
 ```
 
-The runtime is a loop. The work is a graph.
+Use repository-native artifacts. Do not install an orchestration platform merely to adopt this protocol. Every added rule must prevent an observed failure; otherwise remove it.
 
-Real projects contain prerequisites, independent branches, external gates, reopened claims, and convergence points. A linear plan hides that shape and grows stale as the agent learns.
+## 2. Vocabulary
 
-Graph Climbing keeps the graph durable and the execution local:
+- **claim graph**: the durable product authority. Its nodes are atomic, falsifiable statements of product truth; its edges are claim dependencies.
+- **claim frontier**: open claims whose dependencies are verified and which are not blocked or unknown.
+- **active frontier**: the actual executable selection set. Without an Execution Graph it equals the claim frontier; with one it contains executable verticals.
+- **vertical**: one bounded implementation unit over reachable claims. It is a local execution choice unless coordination makes it worth persisting.
+- **Execution Graph / ledger**: optional operational state for long runs, gates, ownership, debt, or multiple workers. It does not define product truth.
+- **evidence**: an observation tied to an exact code, artifact, dependency, or runtime snapshot.
+- **climb**: one `derive → select → build → verify → reconcile` iteration.
+- **Graph Climbing**: the complete protocol across repeated climbs.
+- **reconcile**: write claim status, evidence, decisions, and operational state back to their owning durable surfaces.
+
+An Ideal State Artifact (ISA), PRD, or repository-native spec can implement the claim graph. Beads, GitHub Issues, or another tracker can implement the optional ledger. Goals, hooks, schedulers, and supervisors can support liveness or enforcement. None is a prerequisite.
+
+## 3. Kernel and authority
 
 ```text
-derive the reachable frontier
-→ choose one bounded vertical
-→ build it
-→ verify it against named claims
-→ reconcile durable state
-→ derive the frontier again
+claim graph + evidence + climber
+                    + optional Execution Graph / ledger
 ```
 
-## The kernel
+Keep one authority per concern:
 
-```text
-claim graph + optional execution ledger + evidence store + climber
-```
+- product meaning and official progress belong to the claim graph;
+- ownership, gates, and execution debt belong to at most one ledger;
+- tests, reviews, Git, runtime observations, and releases supply evidence;
+- the climber selects the next vertical but owns no hidden durable truth.
 
-- The claim graph says what must be true.
-- The execution ledger says what is ready, owned, blocked, or deferred.
-- The evidence store records what happened at an exact snapshot.
-- The climber selects and executes one reachable vertical.
+Generated graphs and dashboards are views. They must be reproducible from the authorities, never maintained as competing databases. Brownfield adoption starts by finding existing authorities; do not create a second product spec because its format is unfamiliar.
 
-Use the repository's existing files and tools. Do not build a platform to adopt this protocol.
+## 4. Claim contract
 
-The default setup is enough for most work:
-
-```text
-one durable spec + existing tests and Git + one agent
-```
-
-Add a separate ledger only when work survives multiple sessions, depends on external gates, or has concurrent writers.
-
-Keep one authority per concern: one product authority for meaning and done, at most one operational ledger for execution state, and one active traversal policy for choosing the next slice. Evidence stores and generated views inform those authorities; they do not compete with them.
-
-## Bootstrap
-
-Inspect before creating anything. Adopt an existing durable spec when it can express the contract below. Otherwise create one small repository-native Markdown file with:
-
-- the human intent and desired state;
-- explicit out-of-scope and constraints;
-- stable, atomic done criteria, including falsifiable boundaries against critical failures;
-- dependencies and one named falsifying probe per criterion;
-- criterion status and evidence references;
-- vertical slices that name which criteria they satisfy;
-- decisions that change the graph or meaning of done.
-
-Use existing tests and Git as the initial evidence store. For short serial work, keep current execution state in the spec. Add at most one separate ledger only when coordination must survive sessions, external gates, or concurrent writers.
-
-Before building, report the authority map, active frontier, selected vertical, and first falsifying probe. If these cannot be stated honestly, clarify or inspect further instead of manufacturing structure.
-
-Do not promote an unresolved product assumption into Out of Scope or Constraints. Ask when it materially changes behavior. If interaction is unavailable, persist it as an unknown and keep affected work outside the reachable frontier.
-
-## Desired state and done criteria
-
-The desired state describes the reality the work should produce. The done criteria are the binary claims that prove it.
+Each leaf claim needs a stable ID, desired-state wording, status, dependencies, one named falsifying probe, and snapshot-bound evidence when verified.
 
 ```yaml
 id: C-23.2
 claim: Anonymous artifact access requires verified public authority.
 status: open
-probe: bun test test/public-access.test.ts
 depends_on: [C-17]
+probe: bun test test/public-access.test.ts
 evidence: none
 ```
 
-Stable IDs matter more than numbering order. A claim may be refined, split, reopened, invalidated, or dropped. Its history must remain traceable.
+A claim is atomic when one probe yields one product decision. Split it when one part can pass while another independently fails, especially across UI, API, persistence, security, or release boundaries. Preserve split parents and dropped IDs as history; never reassign an ID.
 
-Write each claim as a desired state. A claim is atomic only when no part can pass while another independently fails. Split conjunctions, cross-domain outcomes, and `all`, `every`, or `complete` language until one probe yields one decision; stop when further splitting adds no falsifying power.
+Use `verified`, `open`, `blocked`, `unknown`, and `dropped` distinctly. Unknown means the evidence or product decision is insufficient; it is not zero progress. A verified sibling may remain closed while another sibling is blocked. Include at least one `Anti:` claim for a grounded critical failure.
 
-The mechanical graph checker cannot prove semantic atomicity. Passing lint never replaces the independent-failure test.
+Progress is not monotonic. New evidence may reopen a verified claim. Review alone is not enough: only a finding that is accepted and independently verified against the relevant snapshot may reopen or add claims. Retain a reason for rebutted or deferred findings.
 
-```text
-too broad: malformed input exits non-zero and leaves stored bytes unchanged
-split:     C-7 malformed input exits non-zero
-           C-8 malformed input leaves stored bytes unchanged
-```
+## 5. Frontier and verticals
 
-## Ledger contract
-
-The ledger is optional. It holds execution state, not product meaning.
-
-```yaml
-id: TASK-123
-scope: one coherent vertical
-claims: [C-23, C-23.1, C-23.2]
-status: ready
-owner: none
-depends_on: [TASK-122]
-allowed_paths: [src/http/**, test/http/**]
-done_when: named probes, review, commit, reconciliation
-```
-
-For short serial work, one `current_slice` field in the spec is enough.
-
-## Evidence contract
-
-Useful evidence includes commits and diffs, focused and full tests, runtime probes, review findings and dispositions, upstream pins, and release artifacts.
-
-A checked claim without adequate evidence is not done. Passing evidence that has not been reconciled into the claim graph is a completion candidate, not official progress.
-
-Keep local verification separate from release authority:
+Derive product reachability first:
 
 ```text
-verified_local     named claims pass against the exact local snapshot
-release_certified  required integration, provenance, and human gates also pass
+claim_frontier = open claims with all dependencies verified
 ```
 
-When work crosses an artifact boundary, declare the input authority, which claims the output supports, where it will be reconciled, and what remains provenance. The output stays a completion candidate until reconciled.
-
-Treat review as a falsifier, not a completion authority. Verify every finding. Accepted findings reopen or add claims; rebutted or deferred findings retain a reason. Repeat only while accepted actionable findings remain inside the current product scope.
-
-## Work graph
-
-Derive these states from durable sources:
+Without an Execution Graph:
 
 ```text
-verified  claims closed with sufficient evidence
-active    currently owned implementation exists
-ready     incomplete, prerequisites complete, no applicable gate
-blocked   prerequisite or external gate unresolved
-unknown   evidence insufficient for an honest classification
+frontier_kind = claim
+active_frontier = claim_frontier
 ```
+
+Choose a small, high-value vertical over that set. Prefer work that unlocks downstream claims, reduces product or safety uncertainty, fits one evidence-bearing change, and has bounded ownership. A vertical may include several dependent claims when at least one entry claim is reachable and every unfinished internal dependency is contained in the same vertical. External dependencies must already be verified.
+
+With an Execution Graph, derive executable verticals from claim reachability plus vertical dependencies, gates, ownership, and scope:
 
 ```text
-active_frontier = active nodes
-                + ready nodes whose predecessors are verified
+frontier_kind = vertical
+active_frontier = executable verticals
 ```
 
-Completion and uncertainty are different questions. A slice can remain incomplete while some claims are already verified. Close those claims; keep unresolved work explicit as open, blocked, or unknown. Never infer confidence from checkbox count alone.
+A blocked claim or release gate must not suppress unrelated reachable claims. Do not keep following yesterday's plan after evidence changes the graph.
 
-The graph is a view. Do not create a second hand-maintained database or dashboard.
+## 6. One climb
 
-## Frontier protocol
+One climb is deliberately local:
 
-At every meaningful boundary:
+1. **Derive** the claim frontier and, if present, the executable vertical frontier from current authorities and evidence.
+2. **Select** one bounded vertical and name its claims, scope, owner, gates, and first falsifying probe.
+3. **Build** freely inside that scope and the repository's safety boundaries.
+4. **Verify** with claim-matched tests, runtime observations, review, and required release gates.
+5. **Reconcile** status, snapshot evidence, decisions, invalidations, ownership, and debt into their owning surfaces.
 
-1. Read the claim graph, ledger, Git state, evidence, and relevant external pins.
-2. Derive active, ready, blocked, and unknown work.
-3. Select the smallest high-value vertical on the reachable frontier.
-4. Claim it atomically when more than one writer exists.
-5. Build freely inside the stated scope and safety boundaries.
-6. Run claim-matched tests, reviews, and runtime probes.
-7. Reconcile claims, decisions, evidence, and ledger state.
-8. Derive the frontier again.
+Then derive again. A build or test result that has not been reconciled is a completion candidate, not official progress. A climb may close one claim, reopen another, expose an unknown, or leave the verified count lower than before; honest topology beats checkbox growth.
 
-Do not follow yesterday's plan after new evidence changes the graph.
-
-## One climb
+Before implementation, report:
 
 ```text
-initial:
-  C-1 verified  project builds at commit abc123
-  C-2 ready     reject anonymous artifact access; depends on C-1
-  C-3 blocked   publish release; depends on C-2 plus human approval
-  C-4 ready     redact secrets from logs; depends on C-1
-
-active_frontier = [C-2, C-4]
-select C-2 → implement → run its named probe → review → commit def456
-reconcile C-2 as verified with evidence at def456
-derive again: C-4 remains ready; C-3 remains blocked until approval
+product_authority:
+operational_ledger:
+evidence_sources:
+claim_frontier:
+frontier_kind: claim|vertical
+active_frontier:
+selected_vertical:
+first_probe:
+unknowns:
 ```
 
-The slice produced official progress without pretending the release was complete. A second worker could take C-4 only if ownership and files were isolated; otherwise the same climber takes it next.
+## 7. Evidence and reconciliation
 
-## Selection policy
+Evidence must name what was observed and where: commit or diff, focused and full tests, runtime response, rendered UI, upstream pin, review finding and disposition, or release artifact. Match modality to claim. A source inspection cannot prove runtime behavior; a local test cannot grant release authority.
 
-Prefer work that unlocks downstream nodes, reduces product or safety uncertainty, fits one evidence-bearing vertical, has bounded ownership, and costs less to coordinate than it returns.
-
-Checked-box count is not the objective. Reliable movement of the reachable frontier is.
-
-## Parallelism
-
-Start a second writing worker only when both slices are ready now, neither depends on the other's unfinished result, files and runtime state can be isolated, each worker owns one explicit task, and one integrator owns reconciliation of the master claim graph.
-
-If setup and merge cost approach serial execution cost, stay serial.
-
-## Human steering
-
-The human supplies intent, priorities, new evidence, stop decisions, and authority for irreversible actions. The human does not need to inspect every tool call.
-
-Persist steering at the narrowest authoritative surface:
+Separate local verification from certification:
 
 ```text
-product meaning changed       → claim graph
-priority or blocker changed   → execution ledger
-new observation               → evidence store
-temporary implementation hint → current context
+verified_local     named claims pass at the exact local snapshot
+release_certified  integration, provenance, and human gates also pass
 ```
 
-Prefer review at events such as a vertical seal, material finding, upstream drift, or public action. Continuous outer-agent supervision can cost as much as another worker while adding little product progress.
+When work crosses a repository or artifact boundary, declare the input authority, supported claim IDs, output snapshot, reconciliation destination, and remaining provenance gaps. Workers and reviewers return evidence candidates. The integrator verifies and reconciles them; they do not self-certify completion.
 
-## Failure modes
+Reconciliation updates only owning surfaces: product truth in the claim graph, operational state in the ledger, observations in the evidence record, and temporary hints in current context. Stable history remains inspectable.
 
-- Checkbox closure without claim-matched evidence.
-- A task tracker that silently becomes a second product spec.
-- A dashboard that drifts from its source files.
-- Review infrastructure that starts reviewing and hardening itself.
-- Parallel workers without isolated ownership.
-- External gates that block unrelated local work.
-- Automatic continuation that wakes without new work.
+## 8. Scaling and anti-patterns
 
-Guardrails should bound product work. They should not become the product.
+Do not create a ledger for a short serial adoption. Add an Execution Graph only when state must survive long runs, external gates, or multiple writers. Parallel workers require separate reachable verticals, explicit owners, disjoint file and runtime scopes, no unfinished dependency between them, and one central reconciliation owner. Stay serial when isolation and merge cost approach the value of parallel execution.
 
-## Optional upgrades
+Common failures:
 
-Add only after an observed need:
+- claim closure without claim-matched evidence;
+- a tracker becoming a second product specification;
+- snapshot-free evidence that cannot be replayed;
+- blocked external work freezing independent local work;
+- parallel writers sharing files or runtime state;
+- review infrastructure recursively hardening itself;
+- automatic continuation waking without new frontier work;
+- commit-per-climb, custom locking, or global ID machinery without an observed need.
 
-- a durable goal for unattended continuation;
-- hooks for deterministic reminders or hard boundaries;
-- a dependency-aware ledger for long or concurrent work;
-- an on-demand outer review for distance and course correction;
-- required CI, branch protection, or human approval for release authority.
+The originating DACS agent-template build used ISA claims for product truth, ISA features for product decomposition, Beads for smaller execution verticals, and exact test/review snapshots for evidence. It also exposed a costly governance detour; the evidence-bounded account is in the [DACS origin case study](https://github.com/mj-deving/graph-climbing/blob/main/case-studies/dacs-agent-template.md).
 
-None belongs in the base protocol.
+## 9. First actions and falsification
 
-## Copy-paste prompt
+Start now:
 
-```text
-Adopt Graph Climbing for this repository.
+1. Inspect repository instructions, existing product authority, tracker, Git state, tests, evidence, and relevant external pins.
+2. Name the authority map. Adopt an adequate existing product authority; create one small repository-native spec only when none exists.
+3. Preserve human intent, boundaries, stable atomic claims, dependencies, probes, status, decisions, and evidence. Keep material unresolved semantics `unknown` and outside the frontier.
+4. Derive and report `claim_frontier`, `frontier_kind`, and `active_frontier`.
+5. Select one bounded vertical and its first falsifying probe. Add no ledger unless the scaling conditions already exist.
+6. Execute one climb, reconcile durable truth, derive again, and continue while reachable work remains.
 
-Use existing repository artifacts. Do not install or build an orchestration platform.
-
-First perform a read-only audit:
-1. Find the durable source that defines the desired state and done criteria.
-2. Identify stable completion claims, probes, dependencies, and current status.
-3. Find the current task or debt ledger, if one exists.
-4. Inspect Git state, tests, review evidence, and relevant external pins.
-5. Derive the active frontier: active and genuinely ready work only.
-6. Distinguish verified completion from unreconciled evidence candidates.
-7. Report current, next, and next-plus-one work.
-8. Report parallel lanes only when dependencies and file ownership make them safe.
-
-Then select one bounded product vertical. Execute autonomously until its evidence-based definition of done is met. Reconcile the durable source and ledger at the boundary, derive the frontier again, and continue.
-
-Never maintain a second authority for the same concern. Never add continuous supervision, hooks, goals, or governance machinery without an observed failure that justifies it. Start parallel workers only under the Parallelism conditions.
-```
-
-## Evidence so far
-
-The originating case is a forkable agent-service template with 161 product claims, moving upstream specifications, adversarial protocol tests, repeated code review, and a dependency ledger.
-
-The useful result was not uninterrupted autonomy. The build exposed two opposite failure modes:
-
-- The agent could hold scattered context together while the durable spec lagged behind.
-- A later attempt to harden observability grew into a self-blocking governance loop.
-
-The correction kept product review and evidence-based closure, restored one current product graph, and made outer supervision event-driven.
-
-One case does not establish a universal productivity gain. It does show that a durable claim graph can survive long runs, context loss, upstream drift, review findings, interruption, and resumed execution without requiring permanent supervision.
-
-## Falsification
-
-Graph Climbing is failing if teams repeatedly cannot reconstruct the current frontier, close claims without matching evidence, spend more on coordination than the parallel work saves, or need a strong agent to remember state missing from durable artifacts.
-
-Track claim coverage, closure integrity, reopen rate, spec-ledger divergence, time to derive the next frontier, review yield, and governance overhead.
+Graph Climbing is failing when a fresh operator cannot reconstruct the frontier, claims close without matching evidence, review findings change truth without verification, spec and ledger compete, coordination costs more than parallel work returns, or a strong agent must remember state absent from durable artifacts. Track closure integrity, reopen rate, spec-ledger divergence, time to derive the next frontier, review yield, and governance overhead. Change the protocol only when those observations justify it.
 
 ## License
 
