@@ -2,6 +2,8 @@
 
 A small, runtime-neutral protocol for long-running agentic engineering.
 
+![Abstract Graph Climbing system: two bounded verticals return evidence to one shared claim foundation](visuals/editorial-hero.svg)
+
 The runtime is a loop. The work is a graph. Graph Climbing gives an engineering agent wide implementation freedom while tying completion to durable claims and snapshot-bound evidence.
 
 Want the protocol as one copy-paste file? Use the [Graph Climbing Gist](https://gist.github.com/mj-deving/b4060f1188a747caf38d0da5c8a7b332).
@@ -65,6 +67,11 @@ Add an Execution Graph and one operational ledger only when work must survive lo
 - [`examples/notes-cli`](examples/notes-cli/README.md): complete small example.
 - [`case-studies/dacs-agent-template.md`](case-studies/dacs-agent-template.md): evidence-bounded origin case.
 - [`conformance/dogfood/2026-07-21-v2.md`](conformance/dogfood/2026-07-21-v2.md): source-blind V2 scenario and CLI evidence.
+- [`visuals`](visuals/README.md): deterministic SVG diagrams, 2400×1350 PNG exports, alt text, semantic Mermaid companions, and the editorial hero.
+
+## Visual system
+
+The publication-grade visual set explains the authority stack, layered claim-first execution, one climb with reconciliation and review reopen, and the DACS origin mapping. SVG is the reproducible design source; PNG is the fixed-size publication export; Mermaid is a semantic companion, not the design source. See the [visual index and QA notes](visuals/README.md).
 
 ## Check a spec
 

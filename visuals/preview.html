@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Graph Climbing visual QA</title>
+  <style>
+    :root { color-scheme: light; --page: #f6f8fa; --card: #fff; --ink: #1f2328; --line: #d0d7de; }
+    :root[data-theme="dark"] { color-scheme: dark; --page: #0d1117; --card: #161b22; --ink: #e6edf3; --line: #30363d; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-width: 0; overflow-x: hidden; }
+    body { background: var(--page); color: var(--ink); font: 16px/1.5 system-ui, sans-serif; }
+    main { width: min(100% - 32px, 1280px); margin: 0 auto; padding: 32px 0 64px; }
+    header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+    h1 { margin: 0; font-size: clamp(1.35rem, 4vw, 2rem); }
+    button { border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); padding: 8px 12px; cursor: pointer; }
+    section { display: grid; gap: 24px; }
+    figure { min-width: 0; margin: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+    img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: contain; }
+    figcaption { padding: 10px 14px; border-top: 1px solid var(--line); font-weight: 600; }
+    @media (max-width: 480px) { main { width: min(100% - 20px, 1280px); padding-top: 20px; } section { gap: 16px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header><h1>Graph Climbing visual QA</h1><button id="theme" type="button">Toggle context</button></header>
+    <section>
+      <figure><img src="editorial-hero.svg" alt="Two separate luminous verticals rise from a shared claim lattice and return amber evidence trails to one mint reconciliation node."><figcaption>Editorial hero</figcaption></figure>
+      <figure><img src="kernel-authority-stack.svg" alt="A claim graph governs a local climber; snapshot-bound evidence reconciles into durable truth while an optional execution graph remains subordinate."><figcaption>Kernel and Authority Stack</figcaption></figure>
+      <figure><img src="layered-claim-first.svg" alt="Two reachable claims map to isolated verticals and workers with disjoint scopes; one integrator reconciles their evidence into the claim graph."><figcaption>Layered Claim-first plus parallel Verticals</figcaption></figure>
+      <figure><img src="one-climb-reconcile-reopen.svg" alt="Derive, select, build, verify, and reconcile form one climb; an accepted verified review finding reopens or adds a claim and may reduce progress."><figcaption>One Climb with Reconciliation and Review Reopen</figcaption></figure>
+      <figure><img src="dacs-mapping.svg" alt="DACS maps ISA criteria to product features, bounded Beads verticals, snapshot evidence, and reconciliation back into ISA truth."><figcaption>DACS mapping</figcaption></figure>
+    </section>
+  </main>
+  <script>
+    document.querySelector('#theme').addEventListener('click', () => {
+      const root = document.documentElement;
+      root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+flowchart LR
+  D[1 Derive\nfrontiers] --> S[2 Select\nvertical + probe]
+  S --> B[3 Build\nbounded scope]
+  B --> V[4 Verify\nsnapshot evidence]
+  V --> R[5 Reconcile\nowning surfaces]
+  R --> D
+  V --> F{Finding accepted\nand verified?}
+  F -->|no| K[Retain reason]
+  F -->|yes| O[Reopen / add claim\nprogress may fall]
+  O --> R

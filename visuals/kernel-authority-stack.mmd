@@ -1,0 +1,6 @@
+flowchart LR
+  C[Claim Graph\nproduct authority] -->|claim frontier| L[Climber\nderive · select · build · verify · reconcile]
+  L -->|observations| E[Evidence\nsnapshot-bound]
+  E -->|reconcile truth| C
+  X[Optional Execution Graph / Ledger\nverticals · owners · gates · debt] -.->|active frontier| L
+  L -.->|operational state| X

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1350" viewBox="0 0 2400 1350" role="img" aria-labelledby="title desc">
+  <title id="title">Text-free Graph Climbing editorial hero</title><desc id="desc">Two isolated luminous verticals rise from one claim lattice while amber evidence trails reconcile into a shared mint node.</desc>
+  <defs>
+    <linearGradient id="hero-bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#070c18"/><stop offset=".55" stop-color="#0d1424"/><stop offset="1" stop-color="#16142a"/></linearGradient>
+    <linearGradient id="cyan" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#17324a"/><stop offset="1" stop-color="#60a5fa"/></linearGradient>
+    <linearGradient id="violet" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#291d43"/><stop offset="1" stop-color="#c084fc"/></linearGradient>
+    <radialGradient id="mint-glow"><stop stop-color="#5eead4" stop-opacity=".8"/><stop offset="1" stop-color="#5eead4" stop-opacity="0"/></radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="22"/></filter><filter id="soft"><feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#020617" flood-opacity=".6"/></filter>
+  </defs>
+  <rect width="2400" height="1350" fill="url(#hero-bg)"/>
+  <ellipse cx="350" cy="240" rx="620" ry="380" fill="#60a5fa" opacity=".035"/><ellipse cx="2070" cy="260" rx="560" ry="420" fill="#c084fc" opacity=".04"/>
+
+  <g opacity=".42" stroke="#334155" stroke-width="3">
+    <path d="M90 980L1200 760L2310 980L1200 1270Z" fill="#0f192b"/>
+    <path d="M90 980L1200 1180L2310 980M260 945L1200 1110L2140 945M430 910L1200 1040L1970 910M600 875L1200 970L1800 875M770 840L1200 900L1630 840" fill="none"/>
+    <path d="M270 1020L1200 760L2130 1020M500 1080L1200 760L1900 1080M730 1140L1200 760L1670 1140M960 1210L1200 760L1440 1210" fill="none"/>
+  </g>
+
+  <g fill="#16243a" stroke="#475569" stroke-width="3" filter="url(#soft)">
+    <circle cx="350" cy="1008" r="19"/><circle cx="575" cy="1025" r="19"/><circle cx="810" cy="1053" r="19"/><circle cx="1040" cy="1090" r="19"/>
+    <circle cx="1360" cy="1085" r="19"/><circle cx="1595" cy="1048" r="19"/><circle cx="1830" cy="1024" r="19"/><circle cx="2050" cy="1005" r="19"/>
+    <circle cx="610" cy="925" r="19"/><circle cx="875" cy="945" r="19"/><circle cx="1515" cy="940" r="19"/><circle cx="1785" cy="920" r="19"/>
+  </g>
+  <circle cx="1200" cy="1118" r="125" fill="url(#mint-glow)" opacity=".45" filter="url(#blur)"/><circle cx="1200" cy="1118" r="28" fill="#5eead4"/><circle cx="1200" cy="1118" r="50" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55"/>
+
+  <g filter="url(#soft)">
+    <path d="M650 910L650 445L790 365L930 445V910Z" fill="#101d31" stroke="#60a5fa" stroke-width="4"/>
+    <path d="M650 445L790 525L930 445L790 365Z" fill="url(#cyan)" opacity=".85"/>
+    <path d="M790 525V880" stroke="#60a5fa" stroke-width="6"/>
+    <circle cx="790" cy="775" r="19" fill="#60a5fa"/><circle cx="790" cy="655" r="16" fill="#60a5fa"/><circle cx="790" cy="535" r="13" fill="#5eead4"/>
+    <path d="M1470 910V390L1625 300L1780 390V910Z" fill="#17162b" stroke="#c084fc" stroke-width="4"/>
+    <path d="M1470 390L1625 480L1780 390L1625 300Z" fill="url(#violet)" opacity=".88"/>
+    <path d="M1625 480V880" stroke="#c084fc" stroke-width="6"/>
+    <circle cx="1625" cy="775" r="19" fill="#c084fc"/><circle cx="1625" cy="645" r="16" fill="#c084fc"/><circle cx="1625" cy="500" r="13" fill="#f0abfc"/>
+  </g>
+
+  <g fill="none" stroke="#fbbf24" stroke-linecap="round">
+    <path d="M790 790C830 960 980 1080 1170 1115" stroke-width="4" opacity=".8"/><path d="M790 760C900 930 1010 1015 1175 1095" stroke-width="2" opacity=".5"/>
+    <path d="M1625 790C1580 960 1435 1080 1230 1115" stroke-width="4" opacity=".8"/><path d="M1625 755C1515 930 1400 1020 1225 1095" stroke-width="2" opacity=".5"/>
+  </g>
+  <g fill="#fbbf24"><circle cx="900" cy="960" r="7"/><circle cx="1000" cy="1040" r="6"/><circle cx="1090" cy="1085" r="5"/><circle cx="1515" cy="960" r="7"/><circle cx="1410" cy="1040" r="6"/><circle cx="1310" cy="1085" r="5"/></g>
+</svg>

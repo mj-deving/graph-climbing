@@ -1,0 +1,17 @@
+flowchart TB
+  subgraph CG[Claim Graph]
+    C1[C-1 verified] --> C2[C-2 open]
+    C1 --> C3[C-3 open]
+    C2 --> C4[C-4 downstream]
+  end
+  C2 --> VA[Vertical A\nHTTP scope]
+  C3 --> VB[Vertical B\nCLI scope]
+  subgraph EG[Optional Execution Graph]
+    VA
+    VB
+  end
+  VA --> WA[Worker A]
+  VB --> WB[Worker B]
+  WA --> I[Integrator]
+  WB --> I
+  I -->|central reconciliation| CG

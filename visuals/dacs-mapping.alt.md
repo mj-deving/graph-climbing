@@ -1,0 +1,3 @@
+# Alt text — DACS Mapping from ISA to Evidence
+
+A dark landscape diagram maps the DACS origin case into the general Graph Climbing layers. Four wide horizontal bands descend from ISA Claims, the product-truth authority, to ISA Features, the product decomposition, to Beads, the smaller executable verticals and gates, and finally to Evidence, the exact commits, tests, runtime probes, review dispositions, and upstream pins. A mint reconciliation rail rises on the right from Evidence back to ISA Claims. A left legend distinguishes permanent authority, decomposition, operational execution, and observation. The diagram states that DACS illustrates the model but does not define it.

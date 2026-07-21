@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1350" viewBox="0 0 2400 1350" role="img" aria-labelledby="title desc">
+  <title id="title">DACS mapping from ISA claims through features and Beads to evidence</title><desc id="desc">Four-layer DACS origin mapping with an upward reconciliation rail.</desc>
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#09101f"/><stop offset="1" stop-color="#141529"/></linearGradient>
+    <filter id="s4"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#020617" flood-opacity=".45"/></filter>
+    <marker id="down4" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0L14 7L0 14Z" fill="#64748b"/></marker>
+    <marker id="up4" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0L14 7L0 14Z" fill="#5eead4"/></marker>
+    <style>.title{font:700 70px Inter,system-ui,sans-serif;fill:#f8fafc}.sub{font:400 29px Inter,system-ui,sans-serif;fill:#94a3b8}.eye{font:700 21px Inter,system-ui,sans-serif;letter-spacing:3px}.level{font:800 27px Inter,system-ui,sans-serif;letter-spacing:2px}.head{font:700 38px Inter,system-ui,sans-serif;fill:#f8fafc}.body{font:500 23px Inter,system-ui,sans-serif;fill:#cbd5e1}.tiny{font:600 19px Inter,system-ui,sans-serif;fill:#94a3b8}</style>
+  </defs>
+  <rect width="2400" height="1350" fill="url(#bg4)"/><circle cx="2220" cy="260" r="330" fill="#5eead4" opacity=".035"/>
+  <text x="120" y="125" class="eye" fill="#fbbf24">ORIGIN CASE · DACS AGENT TEMPLATE</text><text x="120" y="210" class="title">ISA → Features → Beads → Evidence</text><text x="120" y="260" class="sub">A concrete implementation of the model — not the definition of it.</text>
+
+  <g class="tiny">
+    <rect x="120" y="350" width="360" height="515" rx="30" fill="#101827" stroke="#2b3a52" stroke-width="3"/>
+    <text x="170" y="415" class="eye" fill="#94a3b8">LEGEND</text>
+    <rect x="170" y="475" width="20" height="20" rx="5" fill="#5eead4"/><text x="215" y="493">Product authority</text>
+    <rect x="170" y="545" width="20" height="20" rx="5" fill="#60a5fa"/><text x="215" y="563">Decomposition</text>
+    <rect x="170" y="615" width="20" height="20" rx="5" fill="#c084fc"/><text x="215" y="633">Operational execution</text>
+    <rect x="170" y="685" width="20" height="20" rx="5" fill="#fbbf24"/><text x="215" y="703">Observation</text>
+    <path d="M180 770V825" stroke="#5eead4" stroke-width="4" marker-end="url(#up4)"/><text x="215" y="805">Reconciliation</text>
+  </g>
+
+  <g filter="url(#s4)">
+    <rect x="610" y="350" width="1390" height="185" rx="32" fill="#123038" stroke="#5eead4" stroke-width="4"/><text x="675" y="405" class="level" fill="#5eead4">01 · PERMANENT PRODUCT TRUTH</text><text x="675" y="465" class="head">ISA Claims</text><text x="1115" y="450" class="body">Intent · atomic ISCs · dependencies · anti-claims</text><text x="1115" y="487" class="tiny">Official progress lives here</text>
+    <rect x="610" y="590" width="1390" height="185" rx="32" fill="#14243a" stroke="#60a5fa" stroke-width="3"/><text x="675" y="645" class="level" fill="#60a5fa">02 · PRODUCT DECOMPOSITION</text><text x="675" y="705" class="head">ISA Features</text><text x="1115" y="690" class="body">Coherent product areas over related claims</text><text x="1115" y="727" class="tiny">Useful grouping · not a second authority</text>
+    <rect x="610" y="830" width="1390" height="185" rx="32" fill="#211a32" stroke="#c084fc" stroke-width="3"/><text x="675" y="885" class="level" fill="#c084fc">03 · OPERATIONAL EXECUTION</text><text x="675" y="945" class="head">Beads</text><text x="1115" y="930" class="body">Smaller verticals · owners · gates · debt</text><text x="1115" y="967" class="tiny">Dependency-aware ledger · optional implementation</text>
+    <rect x="610" y="1070" width="1390" height="185" rx="32" fill="#2a2320" stroke="#fbbf24" stroke-width="3"/><text x="675" y="1125" class="level" fill="#fbbf24">04 · SNAPSHOT-BOUND OBSERVATION</text><text x="675" y="1185" class="head">Evidence</text><text x="1115" y="1170" class="body">Commits · tests · runtime · review · upstream pins</text><text x="1115" y="1207" class="tiny">Candidates until reconciled</text>
+  </g>
+
+  <path d="M1305 535V570" stroke="#64748b" stroke-width="5" marker-end="url(#down4)"/><path d="M1305 775V810" stroke="#64748b" stroke-width="5" marker-end="url(#down4)"/><path d="M1305 1015V1050" stroke="#64748b" stroke-width="5" marker-end="url(#down4)"/>
+  <path d="M2000 1160H2180V440H2030" fill="none" stroke="#5eead4" stroke-width="6" marker-end="url(#up4)"/>
+  <text x="2220" y="810" class="eye" fill="#5eead4" transform="rotate(-90 2220 810)">CENTRAL RECONCILIATION</text>
+  <rect x="120" y="935" width="360" height="320" rx="30" fill="#101827" stroke="#2b3a52" stroke-width="3"/>
+  <text x="170" y="1000" class="eye" fill="#fbbf24">DACS EVIDENCE</text><text x="170" y="1055" class="body">Moving upstream spec</text><text x="170" y="1100" class="body">Adversarial fixtures</text><text x="170" y="1145" class="body">Repeated review</text><text x="170" y="1190" class="body">Exact provenance pins</text>
+  <text x="1200" y="1315" text-anchor="middle" class="tiny">DACS ILLUSTRATES GRAPH CLIMBING · ISA AND BEADS REMAIN OPTIONAL IMPLEMENTATIONS</text>
+</svg>

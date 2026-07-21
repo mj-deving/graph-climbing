@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1350" viewBox="0 0 2400 1350" role="img" aria-labelledby="title desc">
+  <title id="title">Graph Climbing kernel and authority stack</title>
+  <desc id="desc">Claim graph, climber, evidence, and optional execution graph connected by frontier and reconciliation arrows.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b1020"/><stop offset="1" stop-color="#111a2e"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#020617" flood-opacity=".45"/></filter>
+    <marker id="mint-arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0L14 7L0 14Z" fill="#5eead4"/></marker>
+    <marker id="amber-arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0L14 7L0 14Z" fill="#fbbf24"/></marker>
+    <marker id="purple-arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0L14 7L0 14Z" fill="#c084fc"/></marker>
+    <style>
+      .title{font:700 72px Inter,ui-sans-serif,system-ui,sans-serif;fill:#f8fafc}.sub{font:400 30px Inter,ui-sans-serif,system-ui,sans-serif;fill:#9aa7bd}
+      .eyebrow{font:700 22px Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:4px}.head{font:700 44px Inter,ui-sans-serif,system-ui,sans-serif;fill:#f8fafc}.body{font:400 27px Inter,ui-sans-serif,system-ui,sans-serif;fill:#cbd5e1}.small{font:600 22px Inter,ui-sans-serif,system-ui,sans-serif;fill:#cbd5e1}
+    </style>
+  </defs>
+  <rect width="2400" height="1350" fill="url(#bg)"/>
+  <circle cx="2230" cy="140" r="260" fill="#5eead4" opacity=".045"/><circle cx="2100" cy="1190" r="360" fill="#c084fc" opacity=".04"/>
+  <text x="120" y="135" class="eyebrow" fill="#5eead4">GRAPH CLIMBING · 0.2</text>
+  <text x="120" y="225" class="title">Kernel and authority stack</text>
+  <text x="120" y="280" class="sub">Durable product truth. Local execution. Snapshot-bound evidence.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="120" y="380" width="680" height="690" rx="34" fill="#111d2f" stroke="#5eead4" stroke-width="3"/>
+    <rect x="120" y="380" width="680" height="16" rx="8" fill="#5eead4"/>
+    <text x="175" y="475" class="eyebrow" fill="#5eead4">PERMANENT AUTHORITY</text>
+    <text x="175" y="550" class="head">Claim Graph</text>
+    <text x="175" y="605" class="body">Atomic product truth</text>
+    <g class="small">
+      <rect x="175" y="670" width="570" height="66" rx="16" fill="#162943"/><circle cx="210" cy="703" r="10" fill="#5eead4"/><text x="240" y="711">Intent + desired state</text>
+      <rect x="175" y="754" width="570" height="66" rx="16" fill="#162943"/><circle cx="210" cy="787" r="10" fill="#5eead4"/><text x="240" y="795">Claims + dependencies</text>
+      <rect x="175" y="838" width="570" height="66" rx="16" fill="#162943"/><circle cx="210" cy="871" r="10" fill="#5eead4"/><text x="240" y="879">Decisions + official status</text>
+      <rect x="175" y="922" width="570" height="66" rx="16" fill="#162943"/><circle cx="210" cy="955" r="10" fill="#5eead4"/><text x="240" y="963">Evidence references</text>
+    </g>
+  </g>
+
+  <g filter="url(#shadow)">
+    <circle cx="1175" cy="710" r="250" fill="#142139" stroke="#60a5fa" stroke-width="4"/>
+    <circle cx="1175" cy="710" r="198" fill="none" stroke="#60a5fa" stroke-width="2" stroke-dasharray="9 15" opacity=".65"/>
+    <text x="1175" y="650" text-anchor="middle" class="eyebrow" fill="#60a5fa">LOCAL PROTOCOL</text>
+    <text x="1175" y="725" text-anchor="middle" class="head">Climber</text>
+    <text x="1175" y="780" text-anchor="middle" class="small">derive · select · build</text>
+    <text x="1175" y="818" text-anchor="middle" class="small">verify · reconcile</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1540" y="380" width="740" height="300" rx="34" fill="#241f23" stroke="#fbbf24" stroke-width="3"/>
+    <rect x="1540" y="380" width="740" height="16" rx="8" fill="#fbbf24"/>
+    <text x="1595" y="475" class="eyebrow" fill="#fbbf24">OBSERVATION</text><text x="1595" y="545" class="head">Evidence</text>
+    <text x="1595" y="600" class="body">Tests · runtime · review · release</text><text x="1595" y="642" class="small">Bound to exact snapshots</text>
+
+    <rect x="1540" y="770" width="740" height="300" rx="34" fill="#211a32" stroke="#c084fc" stroke-width="3" stroke-dasharray="14 10"/>
+    <text x="1595" y="855" class="eyebrow" fill="#c084fc">OPTIONAL · SCALED PROFILE</text><text x="1595" y="925" class="head">Execution Graph / Ledger</text>
+    <text x="1595" y="980" class="body">Verticals · owners · gates · debt</text><text x="1595" y="1022" class="small">Never product authority</text>
+  </g>
+
+  <path d="M800 570 C895 520 930 520 972 570" fill="none" stroke="#5eead4" stroke-width="5" marker-end="url(#mint-arrow)"/><text x="886" y="505" class="small" text-anchor="middle">claim frontier</text>
+  <path d="M1365 545 C1430 500 1475 500 1540 525" fill="none" stroke="#fbbf24" stroke-width="5" marker-end="url(#amber-arrow)"/><text x="1450" y="470" class="small" text-anchor="middle">observations</text>
+  <path d="M1540 650 C1420 710 1425 1160 790 1040" fill="none" stroke="#5eead4" stroke-width="5" marker-end="url(#mint-arrow)"/><text x="1170" y="1120" class="small" text-anchor="middle">reconcile truth</text>
+  <path d="M1540 885 C1435 855 1400 835 1365 820" fill="none" stroke="#c084fc" stroke-width="4" stroke-dasharray="13 10" marker-end="url(#purple-arrow)"/><text x="1450" y="815" class="small" text-anchor="middle">active frontier</text>
+  <path d="M1360 920 C1440 1005 1475 1010 1540 1005" fill="none" stroke="#c084fc" stroke-width="4" stroke-dasharray="13 10" marker-end="url(#purple-arrow)"/>
+
+  <rect x="120" y="1180" width="2160" height="76" rx="22" fill="#111827" stroke="#26344d"/>
+  <text x="1200" y="1229" text-anchor="middle" class="small">ONE AUTHORITY PER CONCERN · GENERATED VIEWS ARE NOT AUTHORITIES</text>
+</svg>

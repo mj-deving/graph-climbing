@@ -1,0 +1,3 @@
+# Alt text — Layered Claim-first and Parallel Verticals
+
+A dark landscape diagram shows the permanent Claim Graph across the top. Verified claim C-1 unlocks open claims C-2 and C-3, highlighted as the claim frontier; downstream claim C-4 still depends on C-2. The middle optional Execution Graph maps C-2 to Vertical A and C-3 to Vertical B. Vertical A owns `src/http/**` and `tmp/http-a`; Vertical B owns `src/cli/**` and `tmp/cli-b`. The bottom layer assigns those verticals to Worker A and Worker B. Both return evidence candidates to one central Integrator, whose reconciliation arrow points back to the Claim Graph. Labels emphasize explicit owners, disjoint file and runtime scopes, no unfinished cross-dependency, and central reconciliation.

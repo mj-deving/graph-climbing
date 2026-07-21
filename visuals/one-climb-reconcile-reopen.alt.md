@@ -1,0 +1,3 @@
+# Alt text — One Climb with Reconciliation and Reopen
+
+A dark landscape diagram shows one Graph Climbing iteration as a clockwise five-stage loop: Derive frontiers, Select a vertical and first probe, Build inside bounded scope, Verify against a snapshot, and Reconcile into owning surfaces. The center reads “one climb” and repeats the sequence. From Verify, a coral branch leads to a diamond asking whether a review finding is both accepted and verified. “No” retains the rebuttal or deferral reason. “Yes” reopens or adds a claim and flows into Reconcile. A return arrow from Reconcile to Derive makes the next frontier explicit. A footer notes that progress may fall and unreconciled evidence is only a completion candidate.

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1350" viewBox="0 0 2400 1350" role="img" aria-labelledby="title desc">
+  <title id="title">One Graph Climbing climb with reconciliation and review reopen</title><desc id="desc">Five-step loop with a verified review finding branch that can reopen claims and reduce progress.</desc>
+  <defs>
+    <radialGradient id="bg3"><stop stop-color="#17213a"/><stop offset="1" stop-color="#090e1b"/></radialGradient>
+    <filter id="s3"><feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#020617" flood-opacity=".5"/></filter>
+    <marker id="arrow3" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0L14 7L0 14Z" fill="#60a5fa"/></marker>
+    <marker id="neutral3" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0L14 7L0 14Z" fill="#64748b"/></marker>
+    <marker id="mint3" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0L14 7L0 14Z" fill="#5eead4"/></marker>
+    <marker id="coral3" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0L14 7L0 14Z" fill="#fb7185"/></marker>
+    <style>.title{font:700 70px Inter,system-ui,sans-serif;fill:#f8fafc}.sub{font:400 29px Inter,system-ui,sans-serif;fill:#94a3b8}.eye{font:700 21px Inter,system-ui,sans-serif;letter-spacing:3px}.num{font:800 28px Inter,system-ui,sans-serif}.head{font:700 31px Inter,system-ui,sans-serif;fill:#f8fafc}.body{font:500 22px Inter,system-ui,sans-serif;fill:#cbd5e1}.tiny{font:600 19px Inter,system-ui,sans-serif;fill:#94a3b8}</style>
+  </defs>
+  <rect width="2400" height="1350" fill="url(#bg3)"/>
+  <text x="120" y="125" class="eye" fill="#60a5fa">ONE CLIMB · ONE EVIDENCE-BOUND ITERATION</text><text x="120" y="210" class="title">Derive → select → build → verify → reconcile</text><text x="120" y="260" class="sub">The next frontier is earned by writing the observation back into durable truth.</text>
+
+  <g filter="url(#s3)">
+    <circle cx="1050" cy="790" r="285" fill="#111a2d" stroke="#263c5c" stroke-width="4"/>
+    <circle cx="1050" cy="790" r="205" fill="#0d1424" stroke="#334155" stroke-width="2" stroke-dasharray="8 14"/>
+    <text x="1050" y="760" text-anchor="middle" class="eye" fill="#5eead4">ONE CLIMB</text><text x="1050" y="830" text-anchor="middle" class="head">Local conjecture</text><text x="1050" y="872" text-anchor="middle" class="body">and refutation</text>
+  </g>
+
+  <g filter="url(#s3)">
+    <rect x="190" y="435" width="400" height="170" rx="28" fill="#14243a" stroke="#60a5fa" stroke-width="3"/><circle cx="245" cy="490" r="28" fill="#60a5fa"/><text x="245" y="500" text-anchor="middle" class="num" fill="#08101e">1</text><text x="295" y="490" class="head">Derive</text><text x="245" y="545" class="body">claim frontier · active frontier</text><text x="245" y="577" class="tiny">from current authorities</text>
+    <rect x="670" y="345" width="400" height="170" rx="28" fill="#14243a" stroke="#60a5fa" stroke-width="3"/><circle cx="725" cy="400" r="28" fill="#60a5fa"/><text x="725" y="410" text-anchor="middle" class="num" fill="#08101e">2</text><text x="775" y="400" class="head">Select</text><text x="725" y="455" class="body">vertical · owner · scope</text><text x="725" y="487" class="tiny">name the first probe</text>
+    <rect x="1150" y="345" width="400" height="170" rx="28" fill="#14243a" stroke="#60a5fa" stroke-width="3"/><circle cx="1205" cy="400" r="28" fill="#60a5fa"/><text x="1205" y="410" text-anchor="middle" class="num" fill="#08101e">3</text><text x="1255" y="400" class="head">Build</text><text x="1205" y="455" class="body">freedom inside bounded scope</text><text x="1205" y="487" class="tiny">product work stays primary</text>
+    <rect x="1510" y="620" width="420" height="180" rx="28" fill="#2a2320" stroke="#fbbf24" stroke-width="3"/><circle cx="1565" cy="675" r="28" fill="#fbbf24"/><text x="1565" y="685" text-anchor="middle" class="num" fill="#181207">4</text><text x="1615" y="675" class="head">Verify</text><text x="1565" y="730" class="body">claim-matched evidence</text><text x="1565" y="765" class="tiny">bound to exact snapshot</text>
+    <rect x="1230" y="1030" width="430" height="180" rx="28" fill="#15302f" stroke="#5eead4" stroke-width="4"/><circle cx="1285" cy="1085" r="28" fill="#5eead4"/><text x="1285" y="1095" text-anchor="middle" class="num" fill="#071817">5</text><text x="1335" y="1085" class="head">Reconcile</text><text x="1285" y="1140" class="body">status · evidence · decisions</text><text x="1285" y="1175" class="tiny">and operational state</text>
+  </g>
+
+  <path d="M590 490C625 455 640 440 660 430" fill="none" stroke="#60a5fa" stroke-width="5" marker-end="url(#arrow3)"/><path d="M1070 430H1130" stroke="#60a5fa" stroke-width="5" marker-end="url(#arrow3)"/><path d="M1550 485C1630 525 1665 555 1700 600" fill="none" stroke="#60a5fa" stroke-width="5" marker-end="url(#arrow3)"/><path d="M1660 800C1600 930 1545 975 1490 1010" fill="none" stroke="#5eead4" stroke-width="5" marker-end="url(#mint3)"/><path d="M1230 1140C835 1280 330 1110 330 650" fill="none" stroke="#5eead4" stroke-width="5" marker-end="url(#mint3)"/><text x="535" y="1110" class="tiny">derive again from reconciled truth</text>
+
+  <g filter="url(#s3)">
+    <path d="M2150 560L2320 710L2150 860L1980 710Z" fill="#182031" stroke="#64748b" stroke-width="4"/>
+    <text x="2150" y="688" text-anchor="middle" class="head">Finding accepted</text><text x="2150" y="728" text-anchor="middle" class="body">and verified?</text>
+    <rect x="1980" y="930" width="340" height="125" rx="24" fill="#321c29" stroke="#fb7185" stroke-width="3"/><text x="2150" y="980" text-anchor="middle" class="head">Reopen / add claim</text><text x="2150" y="1020" text-anchor="middle" class="body">progress may fall</text>
+    <rect x="2010" y="380" width="280" height="105" rx="22" fill="#182031" stroke="#64748b" stroke-width="3"/><text x="2150" y="425" text-anchor="middle" class="head">Retain reason</text><text x="2150" y="458" text-anchor="middle" class="tiny">rebutted · deferred</text>
+  </g>
+  <path d="M1930 710H1960" stroke="#64748b" stroke-width="5" marker-end="url(#neutral3)"/>
+  <path d="M2150 560V505" stroke="#64748b" stroke-width="4" marker-end="url(#neutral3)"/><text x="2175" y="540" class="tiny">NO</text>
+  <path d="M2150 860V910" stroke="#fb7185" stroke-width="5" marker-end="url(#coral3)"/><text x="2175" y="895" class="tiny" fill="#fb7185">YES</text>
+  <path d="M1980 995C1810 1050 1730 1090 1670 1110" fill="none" stroke="#fb7185" stroke-width="5" marker-end="url(#coral3)"/>
+
+  <rect x="120" y="1265" width="2160" height="55" rx="18" fill="#101827" stroke="#26344d"/>
+  <text x="1200" y="1301" text-anchor="middle" class="tiny">UNRECONCILED EVIDENCE = COMPLETION CANDIDATE · VERIFIED PROGRESS MAY DECREASE</text>
+</svg>
