@@ -20,10 +20,11 @@ Operate on the repository's durable product authority, optional execution ledger
 - Treat tests, Git, runtime probes, reviews, and release artifacts as evidence, not competing authorities.
 - Preserve stable claim IDs. Split with child IDs; retain dropped IDs as tombstones.
 - Require one falsifying probe per leaf claim and claim-matched evidence before verification.
-- Derive the active frontier from durable sources; never persist a second hand-maintained graph.
-- Treat review as a falsifier. Verify findings before accepting, rebutting, or deferring them.
+- Derive the claim frontier from open claims with verified dependencies. Without an execution graph, it is the active frontier.
+- Treat a Work Graph as an optional scaled profile. With one, the active frontier contains executable verticals rather than claims.
+- Treat review as a falsifier. Only an accepted finding verified against the relevant snapshot may reopen or add a claim.
 - Keep uncertainty separate from verified completion.
-- Prefer one bounded vertical. Parallelize only with proven dependency, file, and runtime isolation.
+- Prefer one bounded vertical. Parallelize only with explicit owners and proven dependency, file, and runtime isolation.
 
 ## Boundaries
 
@@ -42,6 +43,8 @@ mode: bootstrap|audit|reconcile
 product_authority:
 operational_ledger:
 evidence_sources:
+claim_frontier:
+frontier_kind: claim|vertical
 active_frontier:
 divergences:
 unknowns:

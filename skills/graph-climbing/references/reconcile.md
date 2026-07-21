@@ -11,10 +11,10 @@ Use at a meaningful boundary: completed vertical, accepted review finding, human
    - UI claim → rendered observation;
    - release claim → required integration, provenance, and authority gates.
 5. Update each claim independently. Verified siblings may close while the containing slice remains incomplete or uncertain.
-6. Record accepted findings as claim changes or evidence; rebutted and deferred findings keep a reason.
+6. Reopen or add a claim only for a finding that was both accepted and verified against the relevant snapshot. Rebutted and deferred findings keep a reason. Progress may decrease.
 7. Record decisions that change intent, boundaries, graph shape, or rejected approaches. Preserve tombstones and history.
 8. Update the ledger only for operational status, ownership, blockers, debt, or gates. Do not copy the full product spec into it.
-9. Re-run the checker and derive the new frontier.
+9. Re-run the checker and derive the claim frontier, frontier kind, and active frontier.
 10. Report exact changes, probes, remaining unknowns, and the next product action.
 
 Do not silently resolve structural conflicts. Do not block unrelated local product work on release-only or historical gates. Do not open a recursive review loop for governance infrastructure.

@@ -36,19 +36,6 @@ Describe the observable product reality that should exist when this work succeed
 - evidence: none
 - invalidated_by: []
 
-# Work Graph
-
-current_slice: S-1
-
-### S-1: Replace this with one bounded vertical slice
-
-- status: planned
-- satisfies: [C-1, C-2]
-- depends_on: []
-- owner: none
-- allowed_scope: []
-- external_gates: []
-
 # Decisions
 
 - Replace this line with decisions that change meaning, graph shape, or rejected approaches.

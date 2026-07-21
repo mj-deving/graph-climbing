@@ -11,7 +11,8 @@ Given an unfamiliar repository and only the Graph Climbing protocol or skill, an
 - preserves the stated intent and writes a desired state;
 - names boundaries and at least one `Anti:` criterion;
 - produces stable criteria with one probe each;
-- maps bounded vertical slices to criteria and dependencies;
+- derives a claim frontier without requiring a Work Graph or ledger;
+- maps bounded verticals to criteria and dependencies only when the scaled profile is justified;
 - preserves material unspecified product semantics as `unknown` instead of inventing a boundary or default;
 - reports the active frontier and first probe;
 - does not add a runtime, hooks, dashboard, supervisor, or unnecessary ledger.
@@ -23,6 +24,12 @@ Given a mechanically inconsistent reference `SPEC.md`, the checker returns non-z
 ## Reconcile
 
 Given candidate evidence for one criterion, the agent updates that criterion independently, preserves stable IDs, records the evidence snapshot, leaves unresolved siblings open, and derives the next frontier. Unknown IDs or structural conflicts stop automatic reconciliation.
+
+An accepted review finding reopens or adds a claim only after the finding is verified against the relevant snapshot. The verified-claim count may decrease. A blocked or unknown claim does not remove independent reachable claims from the frontier.
+
+## Scaling
+
+Short serial adoption creates no execution ledger. Brownfield adoption preserves an adequate existing product authority. Parallel writers receive separate verticals with explicit owners and disjoint file and runtime scopes; one integrator reconciles the result.
 
 ## Falsifiers
 

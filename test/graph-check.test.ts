@@ -42,6 +42,35 @@ current_slice: S-2
 - external_gates: []
 `;
 
+const claimOnly = `
+# Intent
+> Build the smallest useful notes CLI.
+# Desired State
+Users can save local notes safely.
+# Boundaries
+## Out of Scope
+- Sync.
+## Constraints
+- Local files only.
+# Done Criteria
+### C-1: Notes are stored locally
+- status: verified
+- depends_on: []
+- probe: bun test test/add.test.ts
+- evidence: commit:abc123
+- invalidated_by: []
+### C-2: Anti: Invalid input creates no note
+- status: open
+- depends_on: [C-1]
+- probe: bun test test/invalid.test.ts
+- evidence: none
+- invalidated_by: []
+# Decisions
+- Keep this short serial adoption claim-first.
+# Verification
+- C-1: commit:abc123
+`;
+
 describe("parseList", () => {
   test("parses bracket lists and empty values", () => {
     expect(parseList("[C-1, C-2]")).toEqual(["C-1", "C-2"]);
@@ -60,8 +89,113 @@ describe("graph-check", () => {
   test("derives a valid frontier", () => {
     const report = checkSpec(base);
     expect(report.valid).toBe(true);
+    expect(report.claimFrontier).toEqual(["C-2"]);
+    expect(report.frontierKind).toBe("vertical");
     expect(report.activeFrontier).toEqual(["S-2"]);
     expect(report.blocked).toEqual([]);
+  });
+
+  test("derives a claim frontier without an execution graph", () => {
+    const report = checkSpec(claimOnly);
+    expect(report.valid).toBe(true);
+    expect(report.counts.slices).toBe(0);
+    expect(report.claimFrontier).toEqual(["C-2"]);
+    expect(report.frontierKind).toBe("claim");
+    expect(report.activeFrontier).toEqual(["C-2"]);
+    expect(report.currentSlice).toBeNull();
+  });
+
+  test("warns when execution markers sit outside an exact Work Graph section", () => {
+    const mislabeled = base.replace("# Work Graph", "# Work Graph — execution");
+    const report = checkSpec(mislabeled);
+    expect(report.valid).toBe(false);
+    expect(report.frontierKind).toBe("claim");
+    expect(report.warnings.some((warning) => warning.startsWith("possible_work_graph_heading"))).toBe(true);
+    expect(report.errors.some((error) => error.startsWith("current_slice_outside_work_graph"))).toBe(true);
+    expect(report.errors.some((error) => error.startsWith("vertical_outside_work_graph"))).toBe(true);
+  });
+
+  test("keeps an independent claim reachable when another claim is blocked", () => {
+    const independent = claimOnly.replace(
+      "# Decisions",
+      `### C-3: A release is approved
+- status: blocked
+- depends_on: []
+- probe: gh release view
+- evidence: none
+- invalidated_by: []
+# Decisions`,
+    );
+    const report = checkSpec(independent);
+    expect(report.activeFrontier).toEqual(["C-2"]);
+    expect(report.blocked).toEqual(["C-3"]);
+  });
+
+  test("keeps an independent vertical reachable when another vertical has an external gate", () => {
+    const gated = base
+      .replace("current_slice: S-2", "current_slice: S-3")
+      .replace(
+        "# Work Graph",
+        `### C-3: Local diagnostics are available
+- status: open
+- depends_on: [C-1]
+- probe: bun test test/diagnostics.test.ts
+- evidence: none
+- invalidated_by: []
+# Work Graph`,
+      )
+      .replace(
+        "allowed_scope: [src/cli.ts]\n- external_gates: []",
+        "allowed_scope: [src/cli.ts]\n- external_gates: [release approval]",
+      )
+      .replace(
+        "### S-2: Reject invalid input",
+        `### S-3: Add local diagnostics
+- status: planned
+- satisfies: [C-3]
+- depends_on: [S-1]
+- owner: none
+- allowed_scope: [src/diagnostics.ts]
+- external_gates: []
+### S-2: Reject invalid input`,
+      );
+    const report = checkSpec(gated);
+    expect(report.activeFrontier).toEqual(["S-3"]);
+    expect(report.blocked).toEqual(["S-2"]);
+  });
+
+  test("allows accepted review evidence to reopen a claim and reduce progress", () => {
+    const before = checkSpec(claimOnly.replace(
+      "status: open\n- depends_on: [C-1]",
+      "status: verified\n- depends_on: [C-1]",
+    ).replace("evidence: none", "evidence: commit:def456"));
+    const after = checkSpec(claimOnly
+      .replace("status: verified\n- depends_on: []", "status: open\n- depends_on: []")
+      .replace("evidence: commit:abc123", "evidence: accepted-and-verified-review-finding:F-7@def456"));
+    expect(before.counts.verifiedClaims).toBe(2);
+    expect(after.valid).toBe(true);
+    expect(after.counts.verifiedClaims).toBe(0);
+    expect(after.activeFrontier).toEqual(["C-1"]);
+    expect(after.blocked).toEqual(["C-2"]);
+  });
+
+  test("allows a vertical to contain an internally closed claim chain", () => {
+    const chained = base
+      .replace(
+        "# Work Graph",
+        `### C-3: Invalid input reports a stable error
+- status: open
+- depends_on: [C-2]
+- probe: bun test test/invalid-message.test.ts
+- evidence: none
+- invalidated_by: []
+# Work Graph`,
+      )
+      .replace("satisfies: [C-2]", "satisfies: [C-2, C-3]");
+    const report = checkSpec(chained);
+    expect(report.valid).toBe(true);
+    expect(report.claimFrontier).toEqual(["C-2"]);
+    expect(report.activeFrontier).toEqual(["S-2"]);
   });
 
   test("rejects verified claims without evidence", () => {
@@ -327,7 +461,7 @@ describe("graph-check", () => {
     expect(report.errors).toContain("S-2: active_without_owner");
   });
 
-  test("rejects exact scope collisions between distinct active owners", () => {
+  test("rejects exact scope collisions between distinct active owners once", () => {
     const collision = base
       .replace("status: verified\n- depends_on: []", "status: open\n- depends_on: []")
       .replace("evidence: commit:abc123", "evidence: none")
@@ -338,9 +472,79 @@ describe("graph-check", () => {
       .replace("depends_on: [S-1]", "depends_on: []")
       .replace("owner: none\n- allowed_scope: [src/cli.ts]", "owner: worker-2\n- allowed_scope: [src/shared.ts]");
     const report = checkSpec(collision);
-    expect(report.errors).toContain(
-      "active_scope_collision: S-1 (worker-1) and S-2 (worker-2) both own src/shared.ts",
+    expect(report.errors.filter((error) => error.includes("scope_collision"))).toEqual([
+      "parallel_file_scope_collision: S-1 (worker-1) and S-2 (worker-2) overlap src/shared.ts <> src/shared.ts",
+    ]);
+  });
+
+  test("does not emit parallel scope diagnostics for an unowned active vertical", () => {
+    const unowned = base
+      .replace("status: verified\n- depends_on: []", "status: open\n- depends_on: []")
+      .replace("evidence: commit:abc123", "evidence: none")
+      .replace("depends_on: [C-1]\n- probe: bun test test/invalid.test.ts", "depends_on: []\n- probe: bun test test/invalid.test.ts")
+      .replace("status: verified\n- satisfies: [C-1]", "status: active\n- satisfies: [C-1]")
+      .replace("status: planned\n- satisfies: [C-2]", "status: active\n- satisfies: [C-2]")
+      .replace("depends_on: [S-1]", "depends_on: []")
+      .replace("owner: none\n- allowed_scope: [src/cli.ts]", "owner: worker-2\n- allowed_scope: [src/cli.ts]");
+    const report = checkSpec(unowned);
+    expect(report.errors).toContain("S-1: active_without_owner");
+    expect(report.errors.some((error) => error.startsWith("parallel_"))).toBe(false);
+  });
+
+  test("allows parallel verticals only with disjoint file and runtime scopes", () => {
+    const parallel = base
+      .replace("status: verified\n- depends_on: []", "status: open\n- depends_on: []")
+      .replace("evidence: commit:abc123", "evidence: none")
+      .replace("depends_on: [C-1]\n- probe: bun test test/invalid.test.ts", "depends_on: []\n- probe: bun test test/invalid.test.ts")
+      .replace("status: verified\n- satisfies: [C-1]", "status: active\n- satisfies: [C-1]")
+      .replace(
+        "owner: none\n- allowed_scope: [src/store.ts]\n- external_gates: []",
+        "owner: worker-1\n- allowed_scope: [src/store/**]\n- runtime_scope: [tmp/store-1]\n- external_gates: []",
+      )
+      .replace("status: planned\n- satisfies: [C-2]", "status: active\n- satisfies: [C-2]")
+      .replace("depends_on: [S-1]", "depends_on: []")
+      .replace(
+        "owner: none\n- allowed_scope: [src/cli.ts]\n- external_gates: []",
+        "owner: worker-2\n- allowed_scope: [src/cli/**]\n- runtime_scope: [tmp/cli-2]\n- external_gates: []",
+      );
+    const disjoint = checkSpec(parallel);
+    expect(disjoint.valid).toBe(true);
+    expect(disjoint.activeFrontier).toEqual(["S-1", "S-2"]);
+
+    const collision = checkSpec(parallel.replace("tmp/cli-2", "tmp/store-1"));
+    expect(collision.errors.some((error) => error.startsWith("parallel_runtime_scope_collision:"))).toBe(true);
+
+    const unsupported = checkSpec(parallel.replace("src/cli/**", "src/plugin-*"));
+    expect(unsupported.errors).toContain(
+      "unsupported_parallel_scope_pattern: src/plugin-*; use an exact scope or a terminal /**",
     );
+
+    const normalizedCollision = checkSpec(parallel.replace("src/cli/**", "src/store/../store/session/**"));
+    expect(normalizedCollision.errors.some((error) => error.startsWith("parallel_file_scope_collision:"))).toBe(true);
+
+    for (const escaping of ["../**", "/src/**", "src\\**", "src/plugin-?/**", "src/[ab]/**", "src/{ab}/**"]) {
+      const escaped = checkSpec(parallel.replace("src/cli/**", escaping));
+      expect(escaped.errors).toContain(
+        `unsupported_parallel_scope_pattern: ${escaping}; use an exact scope or a terminal /**`,
+      );
+    }
+
+    const exactAncestor = checkSpec(parallel
+      .replace("src/store/**", "src/pkg")
+      .replace("src/cli/**", "src/pkg/file.ts"));
+    expect(exactAncestor.valid).toBe(true);
+  });
+
+  test("keeps verticals with blocked or unknown owned claims out of the frontier", () => {
+    for (const status of ["blocked", "unknown"]) {
+      const unavailable = base.replace(
+        "status: open\n- depends_on: [C-1]",
+        `status: ${status}\n- depends_on: [C-1]`,
+      );
+      const report = checkSpec(unavailable);
+      expect(report.activeFrontier).toEqual([]);
+      expect(report.blocked).toEqual(["S-2"]);
+    }
   });
 
   test("does not schedule claims whose external claim dependency is open", () => {

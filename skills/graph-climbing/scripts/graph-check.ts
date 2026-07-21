@@ -1,3 +1,5 @@
+import { posix } from "node:path";
+
 export type NodeKind = "claim" | "slice";
 
 export interface GraphNode {
@@ -14,6 +16,7 @@ export interface ParsedSpec {
   slices: GraphNode[];
   currentSlice: string | null;
   issues: string[];
+  warnings: string[];
 }
 
 export interface GraphReport {
@@ -26,6 +29,8 @@ export interface GraphReport {
     slices: number;
     verifiedSlices: number;
   };
+  claimFrontier: string[];
+  frontierKind: "claim" | "vertical";
   activeFrontier: string[];
   blocked: string[];
   unknown: string[];
@@ -37,7 +42,6 @@ const requiredSections = [
   "Desired State",
   "Boundaries",
   "Done Criteria",
-  "Work Graph",
 ];
 
 const claimStatuses = new Set(["open", "verified", "blocked", "unknown", "dropped"]);
@@ -76,6 +80,7 @@ export function parseSpec(text: string): ParsedSpec {
   const claims: GraphNode[] = [];
   const slices: GraphNode[] = [];
   const issues: string[] = [];
+  const warnings: string[] = [];
   let section = "";
   let current: GraphNode | null = null;
   let currentSlice: string | null = null;
@@ -102,6 +107,9 @@ export function parseSpec(text: string): ParsedSpec {
       const label = heading[2].trim();
 
       if (level <= 2) {
+        if (/work graph/i.test(label) && label !== "Work Graph") {
+          warnings.push(`possible_work_graph_heading at line ${index + 1}: ${label}`);
+        }
         section = label;
         sections.add(label);
         current = null;
@@ -139,6 +147,10 @@ export function parseSpec(text: string): ParsedSpec {
         } else issues.push(`unparseable_slice_heading at line ${index + 1}: ${label}`);
         continue;
       }
+
+      if (level === 3 && section !== "Work Graph" && /^S-[A-Za-z0-9][A-Za-z0-9.-]*\s*(?::|—)/.test(label)) {
+        issues.push(`vertical_outside_work_graph at line ${index + 1}: ${label}`);
+      }
     }
 
     if (section === "Work Graph") {
@@ -151,6 +163,8 @@ export function parseSpec(text: string): ParsedSpec {
           currentSliceLine = index + 1;
         }
       }
+    } else if (/^current_slice:\s*(.+?)\s*$/.test(line)) {
+      issues.push(`current_slice_outside_work_graph at line ${index + 1}`);
     }
 
     if (current) {
@@ -165,7 +179,7 @@ export function parseSpec(text: string): ParsedSpec {
 
   if (fence !== null) issues.push("unclosed_code_fence");
 
-  return { sections, claims, slices, currentSlice, issues };
+  return { sections, claims, slices, currentSlice, issues, warnings };
 }
 
 function emptyValue(value: string | undefined): boolean {
@@ -215,9 +229,34 @@ function duplicateIds(nodes: GraphNode[]): string[] {
   return [...duplicates].sort();
 }
 
+type ScopePattern = { path: string; recursive: boolean };
+
+function parseScopePattern(scope: string): ScopePattern | null {
+  if (scope.includes("\\")) return null;
+  if (/[?\[\]{}()!]/.test(scope)) return null;
+  const global = scope === "*" || scope === "**";
+  const recursive = global || scope.endsWith("/**");
+  if (!global && scope.includes("*") && !recursive) return null;
+  if (recursive && !global && scope.indexOf("*") !== scope.length - 2) return null;
+  const prefix = global ? "." : scope.replace(/\/\*\*$/, "");
+  const normalized = posix.normalize(prefix);
+  if (posix.isAbsolute(normalized) || normalized === ".." || normalized.startsWith("../")) return null;
+  return { path: normalized, recursive };
+}
+
+function scopesOverlap(left: string, right: string): boolean {
+  const leftPattern = parseScopePattern(left);
+  const rightPattern = parseScopePattern(right);
+  if (!leftPattern || !rightPattern) return false;
+  if (leftPattern.path === "." || rightPattern.path === ".") return true;
+  if (leftPattern.path === rightPattern.path) return true;
+  return (leftPattern.recursive && rightPattern.path.startsWith(`${leftPattern.path}/`)) ||
+    (rightPattern.recursive && leftPattern.path.startsWith(`${rightPattern.path}/`));
+}
+
 export function checkParsedSpec(spec: ParsedSpec): GraphReport {
   const errors: string[] = [...spec.issues];
-  const warnings: string[] = [];
+  const warnings: string[] = [...spec.warnings];
 
   for (const section of requiredSections) {
     if (!spec.sections.has(section)) errors.push(`missing_section: ${section}`);
@@ -228,9 +267,10 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
 
   const claimById = new Map(spec.claims.map((claim) => [claim.id, claim]));
   const sliceById = new Map(spec.slices.map((slice) => [slice.id, slice]));
+  const hasWorkGraph = spec.sections.has("Work Graph");
 
   if (spec.claims.length === 0) errors.push("claims_missing: Done Criteria has no parseable C-* entries");
-  if (spec.slices.length === 0) errors.push("slices_missing: Work Graph has no parseable S-* entries");
+  if (hasWorkGraph && spec.slices.length === 0) errors.push("slices_missing: Work Graph has no parseable S-* entries");
 
   if (!spec.claims.some((claim) => /^Anti:/i.test(claim.title) && claim.fields.status?.toLowerCase() !== "dropped")) {
     errors.push("anti_claim_missing: add at least one critical Anti: criterion");
@@ -333,19 +373,30 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
       .filter((slice) => slice.fields.status?.toLowerCase() !== "dropped")
       .flatMap((slice) => parseList(slice.fields.satisfies)),
   );
-  for (const claim of spec.claims) {
-    const status = claim.fields.status?.toLowerCase();
-    if (!["verified", "dropped"].includes(status ?? "") && !ownedClaims.has(claim.id)) {
-      errors.push(`${claim.id}: incomplete_claim_without_slice`);
+  if (hasWorkGraph) {
+    for (const claim of spec.claims) {
+      const status = claim.fields.status?.toLowerCase();
+      if (!["verified", "dropped"].includes(status ?? "") && !ownedClaims.has(claim.id)) {
+        errors.push(`${claim.id}: incomplete_claim_without_slice`);
+      }
     }
   }
+
+  const claimDependenciesVerified = (claim: GraphNode): boolean =>
+    parseList(claim.fields.depends_on).every(
+      (dependency) => claimById.get(dependency)?.fields.status?.toLowerCase() === "verified",
+    );
+  const claimFrontier = spec.claims
+    .filter((claim) => claim.fields.status?.toLowerCase() === "open" && claimDependenciesVerified(claim))
+    .map((claim) => claim.id)
+    .sort();
 
   const predecessorVerified = (slice: GraphNode): boolean =>
     parseList(slice.fields.depends_on).every(
       (dependency) => sliceById.get(dependency)?.fields.status?.toLowerCase() === "verified",
     );
   const noExternalGates = (slice: GraphNode): boolean => parseList(slice.fields.external_gates).length === 0;
-  const claimsReachable = (slice: GraphNode): boolean => {
+  const claimsInternallyClosed = (slice: GraphNode): boolean => {
     const owned = new Set(parseList(slice.fields.satisfies));
     return [...owned].every((claimId) => {
       const claim = claimById.get(claimId);
@@ -359,6 +410,16 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
           (owned.has(dependencyId) && ["open", "verified"].includes(dependencyStatus ?? ""));
       });
     });
+  };
+  const hasReachableEntry = (slice: GraphNode): boolean => {
+    const owned = new Set(parseList(slice.fields.satisfies));
+    return [...owned].some((claimId) => {
+      const claim = claimById.get(claimId);
+      return claim?.fields.status?.toLowerCase() === "open" && claimDependenciesVerified(claim);
+    });
+  };
+  const claimsReachable = (slice: GraphNode): boolean => {
+    return claimsInternallyClosed(slice) && hasReachableEntry(slice);
   };
   const hasOpenClaim = (slice: GraphNode): boolean => parseList(slice.fields.satisfies).some(
     (claimId) => claimById.get(claimId)?.fields.status?.toLowerCase() === "open",
@@ -392,38 +453,65 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
     }
   }
 
-  const activeScopes = new Map<string, { sliceId: string; owner: string }>();
-  for (const slice of active) {
-    for (const scope of parseList(slice.fields.allowed_scope)) {
-      const prior = activeScopes.get(scope);
-      const owner = slice.fields.owner ?? "";
-      if (prior && prior.owner !== owner) {
-        errors.push(`active_scope_collision: ${prior.sliceId} (${prior.owner}) and ${slice.id} (${owner}) both own ${scope}`);
-      } else if (prior) {
-        warnings.push(`active_scope_reuse: ${prior.sliceId} and ${slice.id} share owner ${owner} for ${scope}`);
-      } else activeScopes.set(scope, { sliceId: slice.id, owner });
+  for (let leftIndex = 0; leftIndex < active.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < active.length; rightIndex += 1) {
+      const left = active[leftIndex];
+      const right = active[rightIndex];
+      const leftOwner = left.fields.owner ?? "";
+      const rightOwner = right.fields.owner ?? "";
+      if (emptyValue(leftOwner) || emptyValue(rightOwner) || leftOwner === rightOwner) continue;
+
+      const leftFiles = parseList(left.fields.allowed_scope);
+      const rightFiles = parseList(right.fields.allowed_scope);
+      const leftRuntime = parseList(left.fields.runtime_scope);
+      const rightRuntime = parseList(right.fields.runtime_scope);
+      if (leftFiles.length === 0 || rightFiles.length === 0) {
+        errors.push(`parallel_file_scope_missing: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner})`);
+      }
+      if (leftRuntime.length === 0 || rightRuntime.length === 0) {
+        errors.push(`parallel_runtime_scope_missing: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner})`);
+      }
+      for (const scope of [...leftFiles, ...rightFiles, ...leftRuntime, ...rightRuntime]) {
+        if (!parseScopePattern(scope)) {
+          errors.push(`unsupported_parallel_scope_pattern: ${scope}; use an exact scope or a terminal /**`);
+        }
+      }
+      for (const leftScope of leftFiles) {
+        for (const rightScope of rightFiles) {
+          if (scopesOverlap(leftScope, rightScope)) {
+            errors.push(`parallel_file_scope_collision: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner}) overlap ${leftScope} <> ${rightScope}`);
+          }
+        }
+      }
+      for (const leftScope of leftRuntime) {
+        for (const rightScope of rightRuntime) {
+          if (scopesOverlap(leftScope, rightScope)) {
+            errors.push(`parallel_runtime_scope_collision: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner}) overlap ${leftScope} <> ${rightScope}`);
+          }
+        }
+      }
     }
   }
 
-  if (spec.currentSlice && !["none", "null"].includes(spec.currentSlice.toLowerCase())) {
+  if (hasWorkGraph && spec.currentSlice && !["none", "null"].includes(spec.currentSlice.toLowerCase())) {
     const selected = sliceById.get(spec.currentSlice);
     if (!selected) errors.push(`current_slice_unknown: ${spec.currentSlice}`);
     else if (!activeFrontier.includes(spec.currentSlice)) {
       errors.push(`current_slice_unreachable: ${spec.currentSlice}`);
     }
-  } else if (activeFrontier.length > 0) {
+  } else if (hasWorkGraph && activeFrontier.length > 0) {
     warnings.push("current_slice_missing: select one active or ready slice before building");
   }
 
-  const blocked = spec.slices
+  const blockedVerticals = spec.slices
     .filter((slice) => {
       const status = slice.fields.status?.toLowerCase();
       return status === "blocked" ||
-        (status === "planned" && (!predecessorVerified(slice) || !noExternalGates(slice) || !claimsReachable(slice)));
+        (status === "planned" && (!predecessorVerified(slice) || !noExternalGates(slice) || !claimsInternallyClosed(slice)));
     })
     .map((slice) => slice.id)
     .sort();
-  const unknown = spec.slices
+  const unknownVerticals = spec.slices
     .filter((slice) => slice.fields.status?.toLowerCase() === "unknown")
     .map((slice) => slice.id)
     .sort();
@@ -438,10 +526,23 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
       slices: spec.slices.length,
       verifiedSlices: spec.slices.filter((slice) => slice.fields.status?.toLowerCase() === "verified").length,
     },
-    activeFrontier,
-    blocked,
-    unknown,
-    currentSlice: spec.currentSlice,
+    claimFrontier,
+    frontierKind: hasWorkGraph ? "vertical" : "claim",
+    activeFrontier: hasWorkGraph ? activeFrontier : claimFrontier,
+    blocked: hasWorkGraph
+      ? blockedVerticals
+      : spec.claims
+        .filter((claim) => claim.fields.status?.toLowerCase() === "blocked" ||
+          (claim.fields.status?.toLowerCase() === "open" && !claimDependenciesVerified(claim)))
+        .map((claim) => claim.id)
+        .sort(),
+    unknown: hasWorkGraph
+      ? unknownVerticals
+      : spec.claims
+        .filter((claim) => claim.fields.status?.toLowerCase() === "unknown")
+        .map((claim) => claim.id)
+        .sort(),
+    currentSlice: hasWorkGraph ? spec.currentSlice : null,
   };
 }
 
@@ -477,6 +578,8 @@ function printText(report: GraphReport, path: string): void {
   console.log(`graph: ${report.valid ? "valid" : "invalid"}`);
   console.log(`claims: ${report.counts.verifiedClaims}/${report.counts.claims} verified`);
   console.log(`slices: ${report.counts.verifiedSlices}/${report.counts.slices} verified`);
+  console.log(`claim_frontier: [${report.claimFrontier.join(", ")}]`);
+  console.log(`frontier_kind: ${report.frontierKind}`);
   console.log(`active_frontier: [${report.activeFrontier.join(", ")}]`);
   console.log(`blocked: [${report.blocked.join(", ")}]`);
   console.log(`unknown: [${report.unknown.join(", ")}]`);
