@@ -145,7 +145,7 @@ Common failures:
 - automatic continuation waking without new frontier work;
 - commit-per-climb, custom locking, or global ID machinery without an observed need.
 
-The originating DACS agent-template build used ISA claims for product truth, ISA features for product decomposition, Beads for smaller execution verticals, and exact test/review snapshots for evidence. It also exposed a costly governance detour; the evidence-bounded account is in the [DACS origin case study](https://github.com/mj-deving/graph-climbing/blob/main/case-studies/dacs-agent-template.md).
+The originating DACS agent-template build used ISA claims for product truth, ISA features for product decomposition, Beads for smaller execution verticals, and exact test/review snapshots for evidence. It also exposed a costly governance detour. The active run is documented in an [interim field report](https://github.com/mj-deving/graph-climbing/blob/main/case-studies/dacs-agent-template.md); the final Graph Climbing and DACS Forge engineering case studies remain separate future artifacts.
 
 ## 9. First actions and falsification
 

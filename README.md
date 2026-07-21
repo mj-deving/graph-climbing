@@ -65,7 +65,9 @@ Add an Execution Graph and one operational ledger only when work must survive lo
 - [`skills/graph-climbing`](skills/graph-climbing/SKILL.md): optional portable skill.
 - `graph-check`: deterministic internal-consistency checker.
 - [`examples/notes-cli`](examples/notes-cli/README.md): complete small example.
-- [`case-studies/dacs-agent-template.md`](case-studies/dacs-agent-template.md): evidence-bounded origin case.
+- [`case-studies`](case-studies/README.md): map of the interim field report, short Autoreview essay, and the two distinct final case studies.
+- [`case-studies/dacs-agent-template.md`](case-studies/dacs-agent-template.md): interim Graph Climbing field report from the active DACS Forge build.
+- [`case-studies/autoreview-semantic-hardening.md`](case-studies/autoreview-semantic-hardening.md): short reusable account of the inner semantic-hardening loop.
 - [`conformance/dogfood/2026-07-21-v2.md`](conformance/dogfood/2026-07-21-v2.md): source-blind V2 scenario and CLI evidence.
 - [`visuals`](visuals/README.md): deterministic SVG diagrams, 2400×1350 PNG exports, alt text, semantic Mermaid companions, and the editorial hero.
 

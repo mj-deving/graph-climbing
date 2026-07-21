@@ -1,8 +1,20 @@
-# From Vibe Coding to Hardened Software
+# DACS Forge in progress: a Graph Climbing field report
 
 Graph Climbing came out of a long-running build of DACS Forge, a forkable service template and conformance kit for DACS Agent Commerce.
 
-This case study records what the agents built, how we steered the run, where the control system went too far, and what the inner review loop did after we corrected it. It is an evidence-bounded engineering account. DACS Forge is not released, canonically designated, or externally qualified.
+Status: interim field report. Evidence capture through 2026-07-21. The build is still active.
+
+This report records what the agents built, how we steered the run, where the control system went too far, and what the inner review loop did after we corrected it. It is not the final Graph Climbing case study, and it is not the DACS Forge engineering case study. DACS Forge is not released, canonically designated, or externally qualified.
+
+## Two future case studies, one live source run
+
+The finished run will support two different long-form accounts.
+
+The final Graph Climbing case study will examine the work graph: claim selection, steering, review reopen, progress regression, governance failure, scope recovery, handoff, and the complete path from initial contract to final outcome.
+
+The DACS Forge engineering case study will examine the product: protocol authority, canonical signed bytes, two-sided evidence, settlement and delivery invariants, hostile resolvers, migration and crash safety, concurrent execution, CLI and HTTP boundaries, container qualification, conformance, and release evidence. That build is an engineering showpiece in its own right and should not be reduced to a process example.
+
+This document is the public field report available while both stories are still accumulating evidence. A shorter companion, [From Vibe Coding to Hardened Software](autoreview-semantic-hardening.md), isolates the inner Autoreview loop for reuse.
 
 ## The two nested loops
 
@@ -148,9 +160,9 @@ The active frontier at capture time was Active-Write Interruption, covering cras
 
 The same snapshot had passed 741 tests and 47,406 assertions across 53 files, plus a 57-module build. It was still not sealed. Green tests did not override unresolved review findings. The working tree had already entered the next correction cycle.
 
-That open edge is part of the case study. Graph Climbing allows progress to fall, claims to reopen, and a nearly complete vertical to remain unfinished.
+That open edge belongs in the field report. Graph Climbing allows progress to fall, claims to reopen, and a nearly complete vertical to remain unfinished.
 
-## What this case establishes
+## What this field report establishes
 
 The run supports four conclusions:
 
@@ -159,7 +171,7 @@ The run supports four conclusions:
 3. More governance is not monotonically safer. Review infrastructure can become the wrong active hill.
 4. Human steering works best when it changes authority, scope, or falsifiers, then lets the inner product loop continue.
 
-The case does not establish universal productivity gains, a complete DACS release, external conformance acceptance, protected API completion, container qualification, exemplar dogfood, canonical designation, or five qualifying forks.
+The report does not establish universal productivity gains, a complete DACS release, external conformance acceptance, protected API completion, container qualification, exemplar dogfood, canonical designation, or five qualifying forks.
 
 Graph Climbing therefore keeps the claim graph permanent and the execution machinery proportional. A serial run can work directly from ready claims. Long runs, gates, or multiple workers may add an execution graph and ledger. Goal runtimes, hooks, supervisors, ISA, and Beads remain optional implementations.
 
