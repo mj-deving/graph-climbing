@@ -52,7 +52,7 @@ A claim is atomic when one probe yields one decision. Split independent failures
 
 Distinguish `verified`, `open`, `blocked`, `unknown`, and `dropped`; unknown means insufficient evidence or decision. Include a grounded `Anti:` claim.
 
-Progress is non-monotonic. Only an accepted finding verified against its snapshot may reopen or add claims. Record rebuttal or deferral reasons.
+Progress may fall. Only snapshot-verified accepted findings reopen or add claims; record rebuttal or deferral.
 
 ## 5. Frontier and verticals
 
@@ -78,7 +78,7 @@ frontier_kind = vertical
 active_frontier = executable verticals
 ```
 
-A blocked claim or gate must not suppress reachable claims. Do not follow stale plans after evidence changes the graph.
+Blocked work must not suppress reachable claims. Re-derive after evidence changes.
 
 An edge is real only when downstream work consumes upstream data, an artifact, verified state, an authority decision, an external gate, or probe-required evidence. Written order alone is not a dependency. Reading a file another lane changes also creates an edge even when write scopes differ.
 
@@ -97,7 +97,7 @@ Then derive again. Unreconciled results are candidates, not progress. A climb ma
 For a durable `/goal` runtime, give every worker the same task-free contract:
 
 ```text
-Operate as one persistent Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Every ledger lease ID is single-assignment to one vertical and envelope hash; recovery tombstones it and creates a new ID. Before steering, resume a serial lease by ID and hash or an N-worker lease by epoch and hash; foreign ownership needs authorized recovery. A ledgerless single writer reconstructs from product truth, Git, and evidence. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after prior workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph revision and envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Verify epoch and hash before and after atomic claim; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile through one record binding lease ID, hash, and epoch: commit truth and evidence, then close that exact ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one persistent Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Every ledger lease ID is single-assignment to one vertical and envelope hash; recovery fences its worker, resolves old records, tombstones the ID, and creates another. Before steering, resume a serial lease by ID and hash or an N-worker lease by epoch and hash; foreign ownership needs authorized recovery. A ledgerless single writer reconstructs from product truth, Git, and evidence. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after prior workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph revision and envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Verify epoch and hash before and after atomic claim; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile through a record binding lease ID, hash, and epoch: only an active current lease may commit truth and evidence, then close that ID. Tombstoned records are superseded. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
 ```
 
 Before implementation, report:

@@ -136,6 +136,14 @@ Accepted finding:
 
 - Claim/resume bound the envelope hash, but close still targeted only the stable ledger ID, allowing stale replay after recovery. Live `bd close --help` exposes no hash compare-and-swap. Correction: operational lease IDs are single-assignment to one stable vertical plus envelope hash. Recovery fences the old worker, tombstones the old lease ID, and creates a new lease ID. Reconciliation binds `{lease_id, vertical_id, envelope_hash, epoch}` and closes that exact ID last, so an old replay cannot close the replacement.
 
+## Post-Fable Codex Round 003
+
+Snapshot: commit `f9176a9`.
+
+Accepted finding:
+
+- A tombstoned old lease could no longer close its replacement, but its incomplete reconciliation record could still write stale product truth before the close step. Correction: recovery must resolve or invalidate every incomplete record before tombstoning and replacement. Commit requires the bound lease to remain active/current; tombstoned records are dispositioned as superseded and never replayed into product truth.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
