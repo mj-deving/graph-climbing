@@ -128,6 +128,14 @@ Accepted findings:
 - The serial-ledger profile had dropped envelope-integrity validation together with the unnecessary epoch. Correction: every ledger lease binds and verifies a canonical envelope hash; only N-worker leases additionally bind a run epoch.
 - The serial-ledger path treated a lost claim race like normal N-worker contention. Correction: a race disproves single-writer status and fails closed for profile reclassification; only N-worker claim losers refresh and try another candidate.
 
+## Post-Fable Codex Round 002
+
+Snapshot: commit `b8cbed5`.
+
+Accepted finding:
+
+- Claim/resume bound the envelope hash, but close still targeted only the stable ledger ID, allowing stale replay after recovery. Live `bd close --help` exposes no hash compare-and-swap. Correction: operational lease IDs are single-assignment to one stable vertical plus envelope hash. Recovery fences the old worker, tombstones the old lease ID, and creates a new lease ID. Reconciliation binds `{lease_id, vertical_id, envelope_hash, epoch}` and closes that exact ID last, so an old replay cannot close the replacement.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.

@@ -97,7 +97,7 @@ Then derive again. Unreconciled results are candidates, not progress. A climb ma
 For a durable `/goal` runtime, give every worker the same task-free contract:
 
 ```text
-Operate as one persistent Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Every ledger lease binds an envelope hash. Before steering, resume a serial lease by ID and hash or an N-worker lease by epoch and hash; foreign ownership needs authorized recovery. A ledgerless single writer reconstructs from product truth, Git, and evidence. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after prior workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph revision and envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Verify epoch and hash before and after atomic claim; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile stores through one durable record: commit truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one persistent Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Every ledger lease ID is single-assignment to one vertical and envelope hash; recovery tombstones it and creates a new ID. Before steering, resume a serial lease by ID and hash or an N-worker lease by epoch and hash; foreign ownership needs authorized recovery. A ledgerless single writer reconstructs from product truth, Git, and evidence. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after prior workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph revision and envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Verify epoch and hash before and after atomic claim; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile through one record binding lease ID, hash, and epoch: commit truth and evidence, then close that exact ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
 ```
 
 Before implementation, report:
@@ -153,14 +153,14 @@ Common failures:
 - review infrastructure recursively hardening itself;
 - commit-per-climb, custom locking, or global ID machinery without an observed need.
 
-The DACS agent-template origin used ISA claims for truth, Beads for execution, and exact test/review snapshots for evidence. The active run has an [interim field report](https://github.com/mj-deving/graph-climbing/blob/main/case-studies/dacs-agent-template.md); final Graph Climbing and DACS Forge studies remain separate.
+The DACS origin used ISA claims, Beads execution, and snapshot evidence. Its [interim field report](https://github.com/mj-deving/graph-climbing/blob/main/case-studies/dacs-agent-template.md) precedes separate final Graph Climbing and DACS Forge studies.
 
 ## 9. First actions and falsification
 
 Start now:
 
-1. Inspect instructions, product authority, tracker, Git, tests, evidence, and external pins.
-2. Name the authority map. Adopt an adequate product authority; create a small repository-native spec only when none exists.
+1. Inspect instructions, authorities, Git, tests, evidence, and external pins.
+2. Name authority map. Adopt an adequate product authority; create a small repository-native spec only when none exists.
 3. Preserve intent, boundaries, stable atomic claims, dependencies, probes, status, decisions, and evidence. Keep unresolved semantics `unknown` and outside the frontier.
 4. Derive and report `claim_frontier`, `frontier_kind`, and `active_frontier`.
 5. Select one bounded vertical and its first falsifying probe. Add no ledger unless the scaling conditions already exist.
