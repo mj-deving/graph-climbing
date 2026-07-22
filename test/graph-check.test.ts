@@ -889,6 +889,18 @@ describe("graph-check", () => {
     expect(serialReport.activeFrontier).toEqual(["S-3", "S-JOIN"]);
   });
 
+  test("keeps admitted disjoint work claimable while one cohort lane is a straggler", async () => {
+    const source = await topologyFixture("n3-straggler-work-stealing");
+    const report = checkSpec(source);
+    expect(report.valid).toBe(true);
+    expect(report.activeFrontier).toEqual(["S-3", "S-4", "S-5"]);
+
+    const overlapping = checkSpec(source.replace("- allowed_scope: [src/d/**]", "- allowed_scope: [src/a/**]"));
+    expect(overlapping.errors.some(
+      (error) => error.startsWith("parallel_file_scope_collision: S-1") && error.includes("S-4"),
+    )).toBe(true);
+  });
+
   test("keeps sealed cohort scopes isolated from concurrent outsiders", async () => {
     const overlapping = (await topologyFixture("n2-sealed-join-ready"))
       .replace(

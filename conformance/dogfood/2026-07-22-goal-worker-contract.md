@@ -294,6 +294,14 @@ Accepted findings:
 
 Correction: resume now requires an inactive barrier and an active barrier prevents mutation. Recovery barriers are explicitly non-stealable and fail-stop. Owner loss keeps the scope frozen until an external principal proves the owner stopped and performs a supported authoritative reset or full epoch replacement; time alone grants no takeover authority.
 
+## Straggler scheduling case
+
+Scenario: a three-lane cohort has two lanes sealed after 20 review rounds while one remains active through round 50. Two workers become available before the companion join.
+
+Expected result: the slow lane blocks the cohort join and its dependents, but not unrelated graph-ready work. After each durable seal, the worker's mutating lease ends while the cohort/epoch retains that lane's scope reservation. The freed worker may claim a ready vertical from the epoch's pre-admitted candidate pool only when compatible with every pending reservation. A non-admitted candidate requires regraph; an overlapping candidate remains blocked.
+
+Source-blind probe: `conformance/fixtures/topology/n3-straggler-work-stealing.md` derives `[S-3, S-4, S-5]`, leaving both joins blocked. The first negative probe exposed a checker gap: unassigned future-ready cohort candidates skipped scope comparison. Correction: under `cohort-v1`, the checker now validates unowned admitted candidates against all pending reservations before claim; legacy unowned active diagnostics remain unchanged.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.

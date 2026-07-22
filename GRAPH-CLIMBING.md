@@ -4,29 +4,29 @@ Engineering protocol: [mj-deving/graph-climbing](https://github.com/mj-deving/gr
 
 ## 1. Thesis
 
-Runtime loops; work forms a graph of prerequisites, branches, gates, reopens, and joins. Linear plans decay.
+Runtime loops over a graph: prerequisites, branches, gates, reopens, joins. Linear plans decay.
 
-Graph Climbing ties work to claims and snapshot evidence. Model once; reschedule. Minimum:
+Graph Climbing ties work to claims and evidence. Model once; reschedule:
 
 ```text
-one product authority + existing tests and Git + one agent
+one product authority + tests and Git + one agent
 ```
 
-Use native artifacts. Add orchestration only when needed. Rules prevent failures.
+Use native artifacts. Add orchestration only when needed.
 
 ## 2. Vocabulary
 
 - **claim graph**: product authority: atomic falsifiable claims plus dependencies.
 - **claim frontier**: open claims with verified dependencies and no blocker or unknown.
-- **active frontier**: executable selection set: claims without an Execution Graph, verticals with one.
+- **active frontier**: executable set: claims without an Execution Graph, verticals with one.
 - **vertical**: bounded unit over reachable claims.
 - **Execution Graph / ledger**: optional state for runs, gates, ownership, debt, or workers; never product truth.
-- **evidence**: observation tied to an exact code, artifact, dependency, or runtime snapshot.
+- **evidence**: snapshot-bound observation of code, artifact, dependency, or runtime.
 - **climb**: one `derive → select → build → verify → reconcile` iteration.
 - **Graph Climbing**: the complete protocol across repeated climbs.
 - **reconcile**: write claim status, evidence, decisions, and operations to owning durable surfaces.
 
-ISA, PRD, or native spec can implement the claim graph. Beads, GitHub Issues, or another tracker can implement the optional ledger. Goal runtimes may support liveness; none is required.
+ISA, PRD, or native spec can implement the claim graph. Beads, GitHub Issues, or another tracker can implement the optional ledger. Goal runtimes support liveness; none is required.
 
 ## 3. Kernel and authority
 
@@ -97,7 +97,7 @@ Then derive again. Unreconciled results are candidates, not progress. A climb ma
 For a durable `/goal` runtime, give every worker the same task-free contract:
 
 ```text
-Operate as one Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Before Ready, the release owner pre-binds every ledger lease to one vertical, envelope hash, workspace, applicable epoch, and recovery barrier ID. Atomic claim binds the unique incarnation; re-read bindings and assume no metadata CAS. Resume requires exact bindings and inactive barrier; handoff proves the old incarnation stopped, no reconciliation is in flight, and acquires its workspace exclusively. Otherwise claim the recovery barrier atomically; losers stop. Its owner freezes claims, stops writers, then replays or dispositions incomplete records on active leases. Replay closes without replacement. Only if work remains may it resolve state, tombstone, and issue a pre-bound lease plus successor barrier; close the barrier last. Owner loss freezes scope for principal recovery; never timeout-steal. Reconciliation owner writes truth in its authority workspace. Recovery is forbidden during live commit-to-close. A ledgerless single writer reconstructs from truth, Git, and evidence. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph revision and envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Before and after claim verify the applicable epoch, hash, and inactive recovery barrier; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile through a snapshot record; when ledger-backed it binds lease ID, hash, and applicable epoch, permits only the active current lease to commit idempotently, then closes that ID with reconciliation and commit references. Ledgerless reconciliation commits product truth and evidence from the record without a ledger. Tombstoned records are superseded. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Before Ready, the release owner pre-binds every ledger lease to one vertical, envelope hash, workspace, applicable epoch, and recovery barrier ID. Atomic claim binds the unique incarnation; re-read bindings and assume no metadata CAS. Resume requires exact bindings and inactive barrier; handoff proves the old incarnation stopped, no reconciliation is in flight, and acquires its workspace exclusively. Otherwise claim the recovery barrier atomically; losers stop. Its owner freezes claims, stops writers, then replays or dispositions incomplete records on active leases. Replay closes without replacement. Only if work remains may it resolve state, tombstone, and issue a pre-bound lease plus successor barrier; close the barrier last. Owner loss freezes scope for principal recovery; never timeout-steal. Reconciliation owner writes truth in its authority workspace. Recovery is forbidden during live commit-to-close. A ledgerless single writer reconstructs from truth, Git, and evidence. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph/base, an admitted candidate pool, and hashes proven compatible for every reservation pair that can overlap through direct reconciliation or join. Before and after claim verify the applicable epoch, hash, and inactive recovery barrier; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile through a snapshot record; when ledger-backed it binds lease ID, hash, and applicable epoch, permits only the active current lease to commit idempotently, then closes that ID with reconciliation and commit references. Ledgerless reconciliation commits product truth and evidence from the record without a ledger. Tombstoned records are superseded. After durable cohort seal, release its worker lease but retain the join reservation; rederive compatible admitted work. No covered claim verifies before join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
 ```
 
 Before implementation, report:
@@ -138,7 +138,7 @@ Do not create a ledger for short serial work. Add an Execution Graph only for du
 
 Use a barrier only for a cross-set operation, shared release, or central reconciliation.
 
-Every released N-way cohort needs explicit owners, compatible file/read/runtime/authority scopes, no unfinished inter-lane dependency, and one pre-created companion reconciliation vertical. Strict Work Graphs declare `topology_contract: cohort-v1`; each lane names `reconcile_via`, and the companion returns the exact set with `join_for`. A lane may become `sealed` after its own probe and review loop, but unlocks no ordinary successor. When all lanes seal, the companion runs combined probes and review, then atomically reconciles lane, join, claim, evidence, decision, and ledger state. Rejected work reactivates only affected lanes. Stay serial when coordination erases the gain.
+Every released N-way cohort needs explicit owners, compatible file/read/runtime/authority scopes, no unfinished inter-lane dependency, and one pre-created companion reconciliation vertical. Strict Work Graphs declare `topology_contract: cohort-v1`; each lane names `reconcile_via`, and the companion returns the exact set with `join_for`. Durable `sealed` releases its worker, not its join-held reservation or successors; that worker may claim another admitted compatible vertical. When all lanes seal, the companion runs combined probes and review, then atomically reconciles lane, join, claim, evidence, decision, and ledger state. Rejected work reactivates only affected lanes. Stay serial when coordination erases the gain.
 
 Common failures:
 

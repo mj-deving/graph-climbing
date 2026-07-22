@@ -712,7 +712,7 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
   }
 
   const scopeCheckedPairs = new Set<string>();
-  const checkParallelScopes = (lanes: GraphNode[]): void => {
+  const checkParallelScopes = (lanes: GraphNode[], includeUnowned = false): void => {
     for (let leftIndex = 0; leftIndex < lanes.length; leftIndex += 1) {
       for (let rightIndex = leftIndex + 1; rightIndex < lanes.length; rightIndex += 1) {
         const left = lanes[leftIndex];
@@ -722,7 +722,7 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
         scopeCheckedPairs.add(pair);
         const leftOwner = left.fields.owner ?? "";
         const rightOwner = right.fields.owner ?? "";
-        if (emptyValue(leftOwner) || emptyValue(rightOwner)) continue;
+        if (!includeUnowned && (emptyValue(leftOwner) || emptyValue(rightOwner))) continue;
         if (!strictCohortTopology && leftOwner === rightOwner) continue;
 
         const leftFiles = parseList(left.fields.allowed_scope);
@@ -765,7 +765,7 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
   const activeCohortOutsiders = spec.slices.filter(
     (slice) => !isJoin(slice) && slice.fields.status?.toLowerCase() === "active" && !reconciliationTarget(slice),
   );
-  checkParallelScopes([...pendingCohortLanes, ...activeCohortOutsiders]);
+  checkParallelScopes([...pendingCohortLanes, ...activeCohortOutsiders], strictCohortTopology);
   const activeSlices = spec.slices.filter((slice) => slice.fields.status?.toLowerCase() === "active");
   checkParallelScopes(activeSlices);
   for (const join of activeSlices.filter(isJoin)) {
