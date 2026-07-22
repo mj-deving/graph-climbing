@@ -160,6 +160,17 @@ Accepted finding:
 
 - The critical-section rewrite accidentally dropped the explicit idempotency requirement for active-record replay. Correction: product truth/evidence application and active-lease replay are idempotent; tombstoned records remain superseded.
 
+## Post-Fable Codex Round 006
+
+Snapshot: commit `8f1d6fe`.
+
+Accepted findings:
+
+- The conformance summary said “active record” instead of requiring its bound lease to remain active/current.
+- The same summary omitted tombstone-old/create-new after recovery while the canonical Goal retained it.
+
+Correction: the conformance wording now mirrors both lease-state conditions exactly.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
