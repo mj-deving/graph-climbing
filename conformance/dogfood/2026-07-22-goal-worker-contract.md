@@ -70,6 +70,17 @@ Accepted findings:
 
 No custom locking protocol was added. Atomic issue claims prevent duplicate ownership; pre-release graph validation prevents distinct claimed lanes from colliding.
 
+## Autoreview Round 002
+
+Snapshot: commit `3c2b10e`.
+
+Accepted findings:
+
+- Separately published admission sets still had a cross-record time-of-check/time-of-use race. Correction: one declared central owner publishes one current admission epoch; replacement requires the prior epoch to be quiescent; candidates bind immutable envelope hashes; workers verify the epoch before and after claim and mutate nothing on mismatch.
+- Steering preceded the owned-lease check. Correction: lease reconstruction now comes first. While a lease exists, only lease-local steering may be ingested, and it may not alter base, scope, authority, or admission epoch.
+
+Scope disposition: both findings affect the same goal/ledger owner boundary and require no new runtime, lock service, or product contract. The second correction cycle therefore remained in scope.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.

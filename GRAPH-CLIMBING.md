@@ -1,6 +1,6 @@
 # Graph Climbing
 
-A compact protocol for long-running agentic engineering. Paste this file into a coding agent or point the agent at it. The reference kit, checker, examples, and origin evidence are at [mj-deving/graph-climbing](https://github.com/mj-deving/graph-climbing).
+A compact protocol for long-running engineering. Give this file to a coding agent. Reference kit and evidence: [mj-deving/graph-climbing](https://github.com/mj-deving/graph-climbing).
 
 ## 1. Thesis
 
@@ -97,7 +97,7 @@ Then derive again. Unreconciled results are candidates, not progress. A climb ma
 For a durable `/goal` runtime, give every worker the same task-free contract:
 
 ```text
-Operate as one persistent Graph Climbing worker. Reconstruct product authority, ledger, checkout, evidence, and gates at every resume and reconciliation. Resume one owned lease first; multiple leases block, and abandoned ownership needs authorized recovery. Otherwise derive the frontier. With N writers, claim only from a validated immutable admission set whose simultaneously claimable envelopes are pairwise compatible with active leases; serialize incompatibilities. In ledger priority and stable-ID order, atomically claim one; losers refresh. A proven single writer may select a local claim-first vertical without a ledger. Execute its release envelope and verify the exact snapshot. Reconcile stores through one durable record: commit product truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its companion join. Claim a join only with integration and checkout authority. Release, derive again, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop on unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one persistent Graph Climbing worker. Reconstruct durable state at every resume and reconciliation. Resume one owned lease before steering; multiple leases block, and abandoned ownership needs authorized recovery. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one centrally published admission epoch whose immutable envelopes are pairwise compatible with active leases. Replace it only after the prior epoch is quiescent; verify it before and after an atomic claim and do not mutate on mismatch. Claim one candidate in ledger priority and stable-ID order; losers refresh. A proven single writer may select locally without a ledger. Execute the envelope and verify its snapshot. Reconcile stores through one durable record: commit product truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
 ```
 
 Before implementation, report:
@@ -118,12 +118,7 @@ unknowns:
 
 Evidence names its snapshot and observation. Match modality to claim; source inspection cannot prove runtime behavior.
 
-Separate local verification from certification:
-
-```text
-verified_local     named claims pass at the exact local snapshot
-release_certified  integration, provenance, and human gates also pass
-```
+Separate local verification of named claims at one snapshot from release certification, which also requires integration, provenance, and human gates.
 
 Across boundaries, declare input authority, claim IDs, output snapshot, reconciliation destination, and provenance gaps. Workers return evidence candidates; they do not self-certify completion.
 
@@ -165,7 +160,7 @@ The DACS agent-template origin used ISA claims for truth, Beads for execution, a
 Start now:
 
 1. Inspect instructions, product authority, tracker, Git, tests, evidence, and external pins.
-2. Name the authority map. Adopt an adequate existing product authority; create one small repository-native spec only when none exists.
+2. Name the authority map. Adopt an adequate product authority; create a small repository-native spec only when none exists.
 3. Preserve intent, boundaries, stable atomic claims, dependencies, probes, status, decisions, and evidence. Keep unresolved semantics `unknown` and outside the frontier.
 4. Derive and report `claim_frontier`, `frontier_kind`, and `active_frontier`.
 5. Select one bounded vertical and its first falsifying probe. Add no ledger unless the scaling conditions already exist.
