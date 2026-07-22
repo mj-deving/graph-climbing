@@ -101,6 +101,15 @@ Accepted findings:
 - First activation did not account for active or abandoned leases predating the epoch. Correction: first activation and replacement use the same clean barrier; every pre-epoch lease, seal, reservation, and join must be reconciled or explicitly withdrawn before publication. A resumed lease must match the current epoch and certified envelope hash.
 - “Can become simultaneously executable” excluded candidates that become ready at different times while an earlier lease or seal still reserves scope. Correction: epoch validation covers every pair whose reservation lifetimes can overlap under any valid schedule. Reservation lasts from claim through direct reconciliation or, for cohort lanes, through companion-join reconciliation.
 
+## Autoreview Round 005
+
+Snapshot: commit `0cfaa97`.
+
+Accepted findings:
+
+- The compact Gist ambiguously allowed old leases or seals to be merely paused. Correction: workers pause or terminate; every prior lease, seal, reservation, and join must reconcile or withdraw before epoch publication.
+- Epoch/hash resume was accidentally unconditional and broke the supported ledgerless single-writer profile. Correction: the check applies to ledger leases. A proven single writer may resume its runtime-local lease or reconstruct partial work from product authority, Git, and evidence after context loss.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.

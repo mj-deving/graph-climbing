@@ -31,7 +31,7 @@ Operate on the repository's durable product authority, optional execution ledger
 - For every released N-way product cohort, opt into `topology_contract: cohort-v1` and pre-create one companion reconciliation vertical. Each lane names it with `reconcile_via`; its `join_for` returns the exact set. A sealed lane is an evidence candidate, never a verified predecessor.
 - Run the inner probe/Autoreview loop per lane and combined probes/review at the companion join. Reconcile cohort completion atomically.
 - When a goal runtime is used, give every worker the same persistent worker contract. Each worker atomically leases at most one compatible mutating vertical, reconciles it, then re-derives and competes for the next graph-ready lease. The goal names no current task.
-- Resume an existing owned lease before steering or selection only when epoch and envelope hash match. For N writers, one central owner publishes an immutable run epoch after a clean all-worker barrier; every pair whose reservation lifetimes can overlap must be compatible. Reconcile separate stores through an idempotent record; close the ledger last.
+- Resume a ledger lease before steering or selection only when epoch and envelope hash match; a proven ledgerless single writer reconstructs local work from product truth, Git, and evidence. For N writers, one central owner publishes an immutable run epoch after a clean all-worker barrier; every pair whose reservation lifetimes can overlap must be compatible. Reconcile separate stores through an idempotent record; close the ledger last.
 
 ## Boundaries
 
