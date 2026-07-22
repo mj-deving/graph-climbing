@@ -171,6 +171,14 @@ Accepted findings:
 
 Correction: the conformance wording now mirrors both lease-state conditions exactly.
 
+## Post-Fable Codex Round 007
+
+Snapshot: commit `da97d7b`.
+
+Accepted finding:
+
+- The conformance recovery sentence applied ledger lease rotation to all three profiles and omitted ledgerless reconstruction. Correction: tombstone/reissue is explicitly lease-backed; `serial-no-ledger` recovers from product truth, Git, and evidence.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
