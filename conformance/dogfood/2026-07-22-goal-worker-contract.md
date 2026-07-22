@@ -92,6 +92,15 @@ Accepted findings:
 
 Design boundary: N-way autonomous progress is supported within one admitted execution graph. Live graph remodeling is not lock-free; it is an explicit rare barrier. This preserves the requested same-goal worker model without claiming an unavailable multi-record transaction.
 
+## Autoreview Round 004
+
+Snapshot: commit `1aa2845`.
+
+Accepted findings:
+
+- First activation did not account for active or abandoned leases predating the epoch. Correction: first activation and replacement use the same clean barrier; every pre-epoch lease, seal, reservation, and join must be reconciled or explicitly withdrawn before publication. A resumed lease must match the current epoch and certified envelope hash.
+- “Can become simultaneously executable” excluded candidates that become ready at different times while an earlier lease or seal still reserves scope. Correction: epoch validation covers every pair whose reservation lifetimes can overlap under any valid schedule. Reservation lasts from claim through direct reconciliation or, for cohort lanes, through companion-join reconciliation.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.

@@ -42,15 +42,15 @@ Keep one authority per concern:
 - tests, reviews, Git, runtime observations, and releases supply evidence;
 - the climber selects the next vertical but owns no hidden durable truth.
 
-Generated views are not authorities. Brownfield adoption finds existing authorities rather than creating another spec.
+Brownfield adoption reuses authorities; generated views are not authorities.
 
 ## 4. Claim contract
 
 Each leaf claim needs a stable ID, desired-state wording, status, dependencies, one falsifying probe, and snapshot-bound evidence when verified.
 
-A claim is atomic when one probe yields one decision. Split independently failing parts. Preserve parents and dropped IDs; never reassign an ID.
+A claim is atomic when one probe yields one decision. Split independent failures. Preserve parents and dropped IDs; never reassign IDs.
 
-Use `verified`, `open`, `blocked`, `unknown`, and `dropped` distinctly. Unknown means insufficient evidence or decision. Include at least one grounded `Anti:` claim.
+Distinguish `verified`, `open`, `blocked`, `unknown`, and `dropped`; unknown means insufficient evidence or decision. Include a grounded `Anti:` claim.
 
 Progress is non-monotonic. Only an accepted finding verified against its snapshot may reopen or add claims. Record rebuttal or deferral reasons.
 
@@ -97,7 +97,7 @@ Then derive again. Unreconciled results are candidates, not progress. A climb ma
 For a durable `/goal` runtime, give every worker the same task-free contract:
 
 ```text
-Operate as one persistent Graph Climbing worker. Reconstruct durable state at every resume and reconciliation. Resume one owned lease before steering; multiple leases block, and abandoned ownership needs authorized recovery. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published before workers start; it binds the graph revision and canonical hashes of envelopes proven compatible for every possible concurrent pair. Verify epoch and hash before and after atomic claim; mutate nothing on mismatch. Regraph only after all epoch workers pause and all lanes and joins reconcile or withdraw, then resume the same goals. Claim one candidate in ledger priority and stable-ID order; losers refresh. A proven single writer may select locally without a ledger. Execute and verify the envelope. Reconcile stores through one durable record: commit product truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one persistent Graph Climbing worker. Reconstruct durable state at every resume and reconciliation. Resume one owned lease before steering only when epoch and envelope hash match; other ownership needs authorized recovery. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after every prior worker, lease, seal, and join is paused, reconciled, or withdrawn. It binds graph revision and canonical envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Verify epoch and hash before and after atomic claim; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim one candidate in ledger priority and stable-ID order; losers refresh. A proven single writer may select locally without a ledger. Execute and verify the envelope. Reconcile stores through one durable record: commit product truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
 ```
 
 Before implementation, report:
