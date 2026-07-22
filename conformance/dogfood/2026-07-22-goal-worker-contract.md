@@ -236,6 +236,18 @@ Accepted finding and live disposition:
 - The contract required atomic incarnation/workspace/hash binding but documented only `bd update <id> --claim`. Live Beads is v1.1.0 in direct mode. Source at tag `v1.1.0` shows direct `cmd/bd/update.go` performs `ClaimIssue` before separate regular metadata updates, so `--claim --set-metadata` is not a single CAS. The atomic `ClaimIssue` does bind actor as assignee plus `in_progress`.
 - Correction: the central release owner pre-binds immutable vertical, envelope hash, workspace, and epoch before Ready. Every runtime uses a unique incarnation as explicit Beads actor; `bd update <id> --claim --actor <incarnation> --json` atomically binds it as assignee. Workers re-read all pre-bound fields after claim. The contract no longer claims atomic claim-time metadata support.
 
+## Commit Codex Round 007
+
+Snapshot: commit `17369fd`.
+
+Accepted findings:
+
+- Skill compression weakened handoff by omitting proof that the prior incarnation stopped and the exclusive-acquire-or-full-transfer rule.
+- Skill and conformance compression omitted the stopped-writer and frozen-claims recovery barrier outside commit-to-close.
+- Gist compression made an epoch appear mandatory for `serial-ledger`.
+
+Correction: the full handoff and recovery fences are restored. Epoch binding and verification are explicitly conditional and therefore required only for `N-worker-epoch`.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
