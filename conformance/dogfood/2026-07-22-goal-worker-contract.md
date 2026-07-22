@@ -152,6 +152,14 @@ Accepted finding:
 
 - An active/current check still raced with recovery because ledger and Git lack one transaction. Correction: official product truth has one declared reconciliation owner and exclusive authority workspace. Recovery/reassignment is forbidden during its commit-to-close critical section. Otherwise recovery durably stops every writer for that authority scope, freezes claims, inspects Git and incomplete records, then tombstones/reissues and resumes. A failed reconciliation enters that barrier rather than racing a live commit.
 
+## Post-Fable Codex Round 005
+
+Snapshot: commit `0d9adcb`.
+
+Accepted finding:
+
+- The critical-section rewrite accidentally dropped the explicit idempotency requirement for active-record replay. Correction: product truth/evidence application and active-lease replay are idempotent; tombstoned records remain superseded.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
