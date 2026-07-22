@@ -6,7 +6,7 @@ A compact protocol for long-running agentic engineering. Paste this file into a 
 
 Runtime is a loop; work is a graph. Engineering contains prerequisites, independent branches, external gates, reopened truths, and convergence points. A linear plan hides that shape and decays as evidence changes.
 
-Graph Climbing gives an agent freedom inside bounded work while tying completion to durable claims and snapshot evidence. Model truth once; schedule it many ways. Minimal system:
+Graph Climbing gives freedom inside bounded work while tying completion to claims and snapshot evidence. Model truth once; schedule it many ways. Minimal system:
 
 ```text
 one product authority + existing tests and Git + one agent
@@ -46,16 +46,7 @@ Generated views are not authorities. Brownfield adoption finds existing authorit
 
 ## 4. Claim contract
 
-Each leaf claim needs a stable ID, desired-state wording, status, dependencies, one named falsifying probe, and snapshot-bound evidence when verified.
-
-```yaml
-id: C-23.2
-claim: Anonymous artifact access requires verified public authority.
-status: open
-depends_on: [C-17]
-probe: bun test test/public-access.test.ts
-evidence: none
-```
+Each leaf claim needs a stable ID, desired-state wording, status, dependencies, one falsifying probe, and snapshot-bound evidence when verified.
 
 A claim is atomic when one probe yields one decision. Split independently failing parts. Preserve parents and dropped IDs; never reassign an ID.
 
@@ -106,7 +97,7 @@ Then derive again. Unreconciled results are candidates, not progress. A climb ma
 For a durable `/goal` runtime, give every worker the same task-free contract:
 
 ```text
-Operate as one persistent Graph Climbing worker. At start, resume, and after every reconciliation, reconstruct product authority, ledger, checkout, evidence, and gates. Derive the current frontier; filter candidates by verified dependencies, cohort barriers, ownership, base, and file/read/runtime/authority scopes. In ledger priority and stable-ID order, atomically claim exactly one compatible vertical. On contention, refresh and try the next; never work unclaimed or hold two mutating leases. Execute its release envelope, falsify early, verify and review the exact snapshot, persist evidence, then seal or reconcile. A cohort lane verifies no product claim before its companion join. Claim a ready join only with integration and checkout authority. Release the lease, derive again, and continue. No ready work is not completion. Complete only when durable product truth verifies all in-scope claims and joins; stop on unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one persistent Graph Climbing worker. Reconstruct product authority, ledger, checkout, evidence, and gates at every resume and reconciliation. Resume one owned lease first; multiple leases block, and abandoned ownership needs authorized recovery. Otherwise derive the frontier. With N writers, claim only from a validated immutable admission set whose simultaneously claimable envelopes are pairwise compatible with active leases; serialize incompatibilities. In ledger priority and stable-ID order, atomically claim one; losers refresh. A proven single writer may select a local claim-first vertical without a ledger. Execute its release envelope and verify the exact snapshot. Reconcile stores through one durable record: commit product truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its companion join. Claim a join only with integration and checkout authority. Release, derive again, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop on unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
 ```
 
 Before implementation, report:

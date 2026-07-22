@@ -37,9 +37,11 @@ A covered claim cannot become verified before its live join. At completion, lane
 
 ## Durable goal workers
 
-The same task-free goal can be given to N workers. At every start, resume, and post-reconciliation boundary, each worker reconstructs current authorities and derives the frontier from durable state. Ledger priority and stable ID determine candidate order; an exact atomic claim grants one compatible mutating lease. Claim losers refresh and try the next candidate. A worker never holds two mutating leases, proceeds after losing a claim, carries a stale selection across reconciliation, or needs a new goal after sealing one vertical.
+The same task-free goal can be given to N workers. At every start, resume, and post-reconciliation boundary, each worker reconstructs current authorities and first resumes its single owned lease. Multiple owned leases fail closed; abandoned leases require explicit authorized recovery. When no lease is owned, ledger priority and stable ID determine candidate order and an exact atomic claim grants one mutating lease. Claim losers refresh and try the next candidate. A worker never carries a stale selection across reconciliation or needs a new goal after sealing one vertical.
 
-The goal owns no mutable task state. Concrete IDs, pins, rounds, scopes, gates, and progress remain in product authority, ledger, Git, and evidence. A sealed cohort lane remains an evidence candidate until its companion join. A ready join is claimable only by a worker with its declared integration and checkout authority. No ready compatible work is not product completion; all in-scope claims and joins must be durably verified.
+Before N-worker release, the graph proves every pair of simultaneously claimable envelopes compatible with every active lease and freezes their scopes; incompatible work receives a real dependency or gate. The goal owns no mutable task state. Concrete IDs, pins, rounds, scopes, gates, and progress remain in product authority, ledger, Git, and evidence. A sealed cohort lane remains an evidence candidate until its companion join. A ready join is claimable only by a worker with its declared integration and checkout authority. A proven single writer may select a claim-first vertical without a ledger; N workers may not.
+
+Cross-store reconciliation persists one snapshot-bound record, commits product truth and evidence, then closes the ledger with the same ID and commit reference. Resume replays an incomplete record idempotently, and downstream work blocks until all owning surfaces agree. No ready compatible work is not product completion; all in-scope claims and joins must be durably verified.
 
 ## Falsifiers
 

@@ -57,6 +57,19 @@ Expected: worker reports the exact waiting edges and yields. It does not mark th
 
 Expected: after reconstruction, every in-scope claim and required join is verified. All workers may independently conclude the persistent goal is complete from the same durable state.
 
+## Autoreview Round 001
+
+Snapshot: commit `a9a741a`.
+
+Accepted findings:
+
+- Per-Bead compare-and-swap did not reserve scopes across distinct claims. Correction: N-worker release now requires a validated, immutable admission frontier pairwise compatible with all active leases; incompatible work is serialized before claiming.
+- Resume did not prefer a lease already owned by the same worker and did not define abandoned ownership. Correction: resume-first, fail on multiple leases, and explicit authorized recovery without time-based stealing.
+- “Atomic” cross-store reconciliation was not implementable across Git-backed product truth and the Beads ledger. Correction: one durable reconciliation ID, product/evidence commit first, ledger close last, idempotent replay, and downstream blocking until agreement.
+- The unconditional ledger claim excluded short single-writer adoption. Correction: a proven single writer may form one runtime-local claim-first lease; unknown writer cardinality fails closed.
+
+No custom locking protocol was added. Atomic issue claims prevent duplicate ownership; pre-release graph validation prevents distinct claimed lanes from colliding.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
