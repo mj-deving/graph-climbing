@@ -1,10 +1,10 @@
 # Graph Climbing
 
-A compact protocol for long-running engineering. Give this file to a coding agent. Reference kit and evidence: [mj-deving/graph-climbing](https://github.com/mj-deving/graph-climbing).
+Compact protocol for long-running engineering. Give it to a coding agent. Kit and evidence: [mj-deving/graph-climbing](https://github.com/mj-deving/graph-climbing).
 
 ## 1. Thesis
 
-Runtime is a loop; work is a graph. Engineering has prerequisites, branches, gates, reopens, and joins; linear plans decay as evidence changes.
+Runtime loops; work is a graph. Engineering: prerequisites, branches, gates, reopens, and joins; linear plans decay as evidence changes.
 
 Graph Climbing ties bounded work to claims and snapshot evidence. Model once; schedule many ways. Minimal system:
 
@@ -97,7 +97,7 @@ Then derive again. Unreconciled results are candidates, not progress. A climb ma
 For a durable `/goal` runtime, give every worker the same task-free contract:
 
 ```text
-Operate as one persistent Graph Climbing worker. Reconstruct durable state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Before steering, resume a serial ledger lease by exact ID or an N-worker lease only when epoch and envelope hash match; foreign ownership needs authorized recovery. A ledgerless single writer reconstructs work from product truth, Git, and evidence. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after prior workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph revision and canonical envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Verify epoch and hash before and after atomic claim; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim one candidate in ledger priority and stable-ID order; losers refresh. Execute and verify the envelope. Reconcile stores through one durable record: commit truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one persistent Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Every ledger lease binds an envelope hash. Before steering, resume a serial lease by ID and hash or an N-worker lease by epoch and hash; foreign ownership needs authorized recovery. A ledgerless single writer reconstructs from product truth, Git, and evidence. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after prior workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph revision and envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Verify epoch and hash before and after atomic claim; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile stores through one durable record: commit truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
 ```
 
 Before implementation, report:

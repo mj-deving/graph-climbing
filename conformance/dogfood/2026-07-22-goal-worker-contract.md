@@ -119,6 +119,15 @@ Accepted findings:
 - The Round 005 correction still required epoch/hash binding for a single writer using a ledger, although epochs existed only in the N-worker profile. Correction: the contract now resolves three profiles explicitly. `serial-ledger` resumes and claims exact IDs without an epoch; only `N-worker-epoch` requires epoch/hash binding.
 - arXiv `2603.21489` was cited under an incorrect title and CAID expansion. Correction: the provenance now uses the paper's actual title, *Effective Strategies for Asynchronous Software Engineering Agents*, and expands CAID as Centralized Asynchronous Isolated Delegation.
 
+## Post-Fable Codex Round 001
+
+Snapshot: commit `1dd63e9`.
+
+Accepted findings:
+
+- The serial-ledger profile had dropped envelope-integrity validation together with the unnecessary epoch. Correction: every ledger lease binds and verifies a canonical envelope hash; only N-worker leases additionally bind a run epoch.
+- The serial-ledger path treated a lost claim race like normal N-worker contention. Correction: a race disproves single-writer status and fails closed for profile reclassification; only N-worker claim losers refresh and try another candidate.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
