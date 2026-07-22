@@ -196,6 +196,17 @@ Accepted finding:
 
 - Incarnation handoff proved process fencing but could rebind to a new workspace while losing uncommitted state in the old one. Correction: handoff must exclusively acquire the original workspace or durably transfer and disposition all Git, filesystem, runtime, and evidence state before rebinding. Missing state invokes recovery.
 
+## Final-bundle Codex Round 003
+
+Snapshot: commit `7061577`.
+
+Accepted findings:
+
+- Gist compression dropped `unique` incarnation and `exclusive` workspace.
+- Skill/conformance compression dropped the prohibition on recovery during commit-to-close and its stopped-writer barrier.
+
+Correction: all compact surfaces now retain both previously accepted invariants.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
