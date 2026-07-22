@@ -43,6 +43,8 @@ For a repository without a durable product specification:
 2. Give the agent [`starter/START.md`](starter/START.md).
 3. From the adopting repository, run `bun /absolute/path/to/graph-climbing/skills/graph-climbing/scripts/graph-check.ts SPEC.md` after the agent fills the claim-first spec.
 
+For a durable `/goal` loop or N parallel workers, give every worker the same [`starter/GOAL.md`](starter/GOAL.md). It contains no current lane: each worker reconstructs durable state, atomically leases one compatible ready vertical, reconciles it, and derives again.
+
 When working inside this kit checkout, use `bun run graph-check <path-to-spec>` instead.
 
 The repository also contains an optional [`graph-climbing` skill](skills/graph-climbing/SKILL.md) for bootstrap, audit, and reconciliation. The protocol does not depend on a skill loader.
@@ -61,6 +63,7 @@ Add an Execution Graph and one operational ledger only when work must survive lo
 
 - [`GRAPH-CLIMBING.md`](GRAPH-CLIMBING.md): canonical, standalone protocol and copy-paste prompt.
 - [`starter/SPEC.md`](starter/SPEC.md): neutral ISA-inspired specification scaffold.
+- [`starter/GOAL.md`](starter/GOAL.md): identical task-free worker contract for serial or N-way goal runtimes.
 - [`starter/CLAIM-CHECKLIST.md`](starter/CLAIM-CHECKLIST.md): atomicity and falsification checks.
 - [`skills/graph-climbing`](skills/graph-climbing/SKILL.md): optional portable skill.
 - `graph-check`: deterministic internal-consistency checker.
@@ -70,6 +73,7 @@ Add an Execution Graph and one operational ledger only when work must survive lo
 - [`case-studies/autoreview-semantic-hardening.md`](case-studies/autoreview-semantic-hardening.md): short reusable account of the inner semantic-hardening loop.
 - [`conformance/dogfood/2026-07-21-v2.md`](conformance/dogfood/2026-07-21-v2.md): source-blind V2 scenario and CLI evidence.
 - [`conformance/dogfood/2026-07-22-topology-design.md`](conformance/dogfood/2026-07-22-topology-design.md): pre-implementation topology contract plus genuine Fable finding disposition.
+- [`conformance/dogfood/2026-07-22-goal-worker-contract.md`](conformance/dogfood/2026-07-22-goal-worker-contract.md): research provenance and source-blind N-worker goal cases.
 - [`conformance/fixtures/topology`](conformance/fixtures/topology): executable N=2/3/4 companion-join and failure fixtures.
 - [`visuals`](visuals/README.md): deterministic SVG diagrams, 2400×1350 PNG exports, alt text, semantic Mermaid companions, and the editorial hero.
 

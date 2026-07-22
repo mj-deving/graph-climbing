@@ -130,3 +130,7 @@ Start with Git, tests, runtime observations, and existing CI. Add structured rev
 ## Optional runtime support
 
 Durable goals, lifecycle hooks, schedulers, and outer supervisors may improve liveness or enforcement. They are not the memory or truth layer and are excluded from the default setup.
+
+When a goal runtime is present, its contract should describe the worker algorithm rather than duplicate a current task. Give every worker the same [`starter/GOAL.md`](../starter/GOAL.md): reconstruct durable state, derive the ready set, atomically lease one compatible vertical, execute and reconcile it, release the lease, then derive again. The lease is exclusive and bounded; the goal persists across leases. Mutable lane IDs, review-round numbers, pins, and progress stay in the ISA/spec, ledger, Git, and evidence.
+
+N mutating workers require one atomic ledger even though a serial adoption does not. Candidate selection uses ledger priority plus a stable-ID tie-break. Claim losers refresh and try the next compatible candidate; they do not work optimistically. Every vertical's release envelope carries the exact base, checkout policy, claim closure, dependency and scope boundaries, probe, stop rule, evidence destination, product-authority write permission, and companion join. A ready join is just another graph-derived lease, but only a worker with declared integration and checkout authority may claim it.

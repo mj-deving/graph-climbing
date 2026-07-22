@@ -35,6 +35,12 @@ Under `topology_contract: cohort-v1`, every released N-way product cohort has on
 
 A covered claim cannot become verified before its live join. At completion, lanes and join share snapshot-bound `completion_evidence`. A later verified finding may reopen one claim with new evidence without rewriting historical execution completion. After a cohort verifies, one later released lane remains valid serial work under the persistent contract. An active join cannot overlap foreign pending cohort scopes.
 
+## Durable goal workers
+
+The same task-free goal can be given to N workers. At every start, resume, and post-reconciliation boundary, each worker reconstructs current authorities and derives the frontier from durable state. Ledger priority and stable ID determine candidate order; an exact atomic claim grants one compatible mutating lease. Claim losers refresh and try the next candidate. A worker never holds two mutating leases, proceeds after losing a claim, carries a stale selection across reconciliation, or needs a new goal after sealing one vertical.
+
+The goal owns no mutable task state. Concrete IDs, pins, rounds, scopes, gates, and progress remain in product authority, ledger, Git, and evidence. A sealed cohort lane remains an evidence candidate until its companion join. A ready join is claimable only by a worker with its declared integration and checkout authority. No ready compatible work is not product completion; all in-scope claims and joins must be durably verified.
+
 ## Falsifiers
 
-The implementation fails this contract if it creates competing product authorities, closes claims without evidence, treats a seal or checker pass as product proof, lets a cohort successor bypass its join, splits one released set across joins, blocks unrelated local work on release-only gates, or grows governance infrastructure to supervise itself.
+The implementation fails this contract if it creates competing product authorities, closes claims without evidence, treats a seal or checker pass as product proof, lets a cohort successor bypass its join, splits one released set across joins, lets a worker act on a lost or stale lease, blocks unrelated local work on release-only gates, or grows governance infrastructure to supervise itself.

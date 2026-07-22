@@ -26,3 +26,5 @@ Before implementation, report:
 
 Do not add a runtime, scheduler, dashboard, continuous supervisor, hooks, or a second source of truth. Then execute one bounded product vertical, verify it, reconcile status, evidence, decisions, and operational state into their owning surfaces, and derive the frontier again.
 ```
+
+For a durable goal runtime or multiple workers, give every worker the same task-free contract in [`GOAL.md`](GOAL.md). Concrete lane IDs and mutable progress stay in the product authority, ledger, and evidence rather than the goal text.

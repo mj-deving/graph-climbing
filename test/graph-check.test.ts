@@ -89,6 +89,12 @@ test("starter distribution matches the skill asset", async () => {
   expect(starter).toBe(asset);
 });
 
+test("goal distribution matches the skill asset", async () => {
+  const starter = await Bun.file(new URL("../starter/GOAL.md", import.meta.url)).text();
+  const asset = await Bun.file(new URL("../skills/graph-climbing/assets/GOAL.md", import.meta.url)).text();
+  expect(starter).toBe(asset);
+});
+
 describe("graph-check", () => {
   test("derives a valid frontier", () => {
     const report = checkSpec(base);

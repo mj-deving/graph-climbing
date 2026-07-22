@@ -12,6 +12,7 @@ Operate on the repository's durable product authority, optional execution ledger
 - Bootstrap or adopt a work graph: read `references/bootstrap.md`.
 - Audit correctness, frontier, blockers, or parallelism: read `references/audit.md`, then run `scripts/graph-check.ts` when the spec follows the reference format.
 - Reconcile a completed slice, finding, steer, or drift event: read `references/reconcile.md`.
+- Install one task-free contract into a durable goal runtime or N workers: use `assets/GOAL.md` verbatim; keep concrete work in the graph and ledger.
 
 ## Invariants
 
@@ -29,10 +30,11 @@ Operate on the repository's durable product authority, optional execution ledger
 - Prefer one bounded vertical. Parallelize only with explicit owners and proven dependency, file/read, runtime, and authority isolation.
 - For every released N-way product cohort, opt into `topology_contract: cohort-v1` and pre-create one companion reconciliation vertical. Each lane names it with `reconcile_via`; its `join_for` returns the exact set. A sealed lane is an evidence candidate, never a verified predecessor.
 - Run the inner probe/Autoreview loop per lane and combined probes/review at the companion join. Reconcile cohort completion atomically.
+- When a goal runtime is used, give every worker the same persistent worker contract. Each worker atomically leases at most one compatible mutating vertical, reconciles it, then re-derives and competes for the next graph-ready lease. The goal names no current task.
 
 ## Boundaries
 
-- Do not require ISA, Beads, a goal runtime, hooks, dashboards, or continuous supervision.
+- Do not require ISA, Beads, a goal runtime, hooks, dashboards, or continuous supervision. When several mutating workers run, require one atomic operational ledger even though its implementation remains optional.
 - Do not overwrite an existing specification during bootstrap.
 - Do not turn a task ledger into a second product specification.
 - Do not automatically close claims, execute irreversible actions, publish, or repair audit findings.

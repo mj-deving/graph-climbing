@@ -4,9 +4,9 @@ A compact protocol for long-running agentic engineering. Paste this file into a 
 
 ## 1. Thesis
 
-The runtime is a loop; the work is a graph. Real engineering contains prerequisites, independent branches, external gates, reopened truths, and convergence points. A linear plan hides that shape and decays as evidence changes.
+Runtime is a loop; work is a graph. Engineering contains prerequisites, independent branches, external gates, reopened truths, and convergence points. A linear plan hides that shape and decays as evidence changes.
 
-Graph Climbing gives an agent freedom inside bounded product work while keeping completion tied to durable claims and snapshot-bound evidence. Model truth once; schedule it many ways. The minimal system is:
+Graph Climbing gives an agent freedom inside bounded work while tying completion to durable claims and snapshot evidence. Model truth once; schedule it many ways. Minimal system:
 
 ```text
 one product authority + existing tests and Git + one agent
@@ -26,7 +26,7 @@ Use repository-native artifacts. Do not install an orchestration platform merely
 - **Graph Climbing**: the complete protocol across repeated climbs.
 - **reconcile**: write claim status, evidence, decisions, and operational state back to their owning durable surfaces.
 
-An Ideal State Artifact (ISA), PRD, or repository-native spec can implement the claim graph. Beads, GitHub Issues, or another tracker can implement the optional ledger. Goals, hooks, schedulers, and supervisors can support liveness or enforcement. None is a prerequisite.
+An ISA, PRD, or repository-native spec can implement the claim graph. Beads, GitHub Issues, or another tracker can implement the optional ledger. Goal runtimes and supervisors can support liveness; none is required.
 
 ## 3. Kernel and authority
 
@@ -42,7 +42,7 @@ Keep one authority per concern:
 - tests, reviews, Git, runtime observations, and releases supply evidence;
 - the climber selects the next vertical but owns no hidden durable truth.
 
-Generated graphs and dashboards are reproducible views, never competing databases. Brownfield adoption finds existing authorities rather than creating a familiar-looking second spec.
+Generated views are not authorities. Brownfield adoption finds existing authorities rather than creating another spec.
 
 ## 4. Claim contract
 
@@ -57,11 +57,11 @@ probe: bun test test/public-access.test.ts
 evidence: none
 ```
 
-A claim is atomic when one probe yields one product decision. Split when one part can pass while another fails independently. Preserve split parents and dropped IDs; never reassign an ID.
+A claim is atomic when one probe yields one decision. Split independently failing parts. Preserve parents and dropped IDs; never reassign an ID.
 
 Use `verified`, `open`, `blocked`, `unknown`, and `dropped` distinctly. Unknown means insufficient evidence or decision. Include at least one grounded `Anti:` claim.
 
-Progress is non-monotonic. Only a finding accepted and independently verified against the relevant snapshot may reopen or add claims. Record reasons for rebuttal or deferral.
+Progress is non-monotonic. Only an accepted finding verified against its snapshot may reopen or add claims. Record rebuttal or deferral reasons.
 
 ## 5. Frontier and verticals
 
@@ -87,7 +87,7 @@ frontier_kind = vertical
 active_frontier = executable verticals
 ```
 
-A blocked claim or release gate must not suppress unrelated reachable claims. Do not keep following yesterday's plan after evidence changes the graph.
+A blocked claim or gate must not suppress reachable claims. Do not follow stale plans after evidence changes the graph.
 
 An edge is real only when downstream work consumes upstream data, an artifact, verified state, an authority decision, an external gate, or probe-required evidence. Written order alone is not a dependency. Reading a file another lane changes also creates an edge even when write scopes differ.
 
@@ -101,7 +101,13 @@ One climb is deliberately local:
 4. **Verify** with claim-matched tests, runtime observations, review, and required release gates.
 5. **Reconcile** status, snapshot evidence, decisions, invalidations, ownership, and debt into their owning surfaces.
 
-Then derive again. Unreconciled results are completion candidates, not official progress. A climb may close, reopen, or expose unknown claims; honest topology beats checkbox growth.
+Then derive again. Unreconciled results are candidates, not progress. A climb may close, reopen, or expose unknowns.
+
+For a durable `/goal` runtime, give every worker the same task-free contract:
+
+```text
+Operate as one persistent Graph Climbing worker. At start, resume, and after every reconciliation, reconstruct product authority, ledger, checkout, evidence, and gates. Derive the current frontier; filter candidates by verified dependencies, cohort barriers, ownership, base, and file/read/runtime/authority scopes. In ledger priority and stable-ID order, atomically claim exactly one compatible vertical. On contention, refresh and try the next; never work unclaimed or hold two mutating leases. Execute its release envelope, falsify early, verify and review the exact snapshot, persist evidence, then seal or reconcile. A cohort lane verifies no product claim before its companion join. Claim a ready join only with integration and checkout authority. Release the lease, derive again, and continue. No ready work is not completion. Complete only when durable product truth verifies all in-scope claims and joins; stop on unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+```
 
 Before implementation, report:
 
@@ -119,7 +125,7 @@ unknowns:
 
 ## 7. Evidence and reconciliation
 
-Evidence names what and where: snapshot, tests, runtime response, rendered UI, upstream pin, review disposition, or release artifact. Match modality to claim; source inspection cannot prove runtime behavior.
+Evidence names its snapshot and observation. Match modality to claim; source inspection cannot prove runtime behavior.
 
 Separate local verification from certification:
 
@@ -128,7 +134,7 @@ verified_local     named claims pass at the exact local snapshot
 release_certified  integration, provenance, and human gates also pass
 ```
 
-Across repository or artifact boundaries, declare the input authority, claim IDs, output snapshot, reconciliation destination, and provenance gaps. Workers and reviewers return evidence candidates; they do not self-certify completion.
+Across boundaries, declare input authority, claim IDs, output snapshot, reconciliation destination, and provenance gaps. Workers return evidence candidates; they do not self-certify completion.
 
 Reconciliation updates only owning surfaces: product truth in the claim graph, operational state in the ledger, observations in the evidence record, and temporary hints in current context. Stable history remains inspectable.
 
@@ -144,9 +150,9 @@ Do not create a ledger for short serial work. Add an Execution Graph only for du
 - **router** when validated output selects the next branch;
 - **verifier fan-out** for independent read-only falsification of one snapshot.
 
-Use a barrier only for a cross-set operation, shared release, or central reconciliation. Deterministic flattening, filtering, or deduplication is code, not an agent job.
+Use a barrier only for a cross-set operation, shared release, or central reconciliation.
 
-Every released N-way cohort needs explicit owners, disjoint file and runtime scopes, no unfinished dependency between lanes, and one pre-created companion reconciliation vertical. New strict Work Graphs declare `topology_contract: cohort-v1`; each lane names its companion with `reconcile_via`, and the companion names the exact set with `join_for`. A lane may become `sealed` after its own probe and Autoreview loop, but sealed work is only an evidence candidate: it unlocks no ordinary successor. When all lanes seal, the companion runs combined probes and review. It then atomically reconciles lane, join, claim, evidence, decision, and ledger state. A rejected candidate returns its lane to active work; unaffected siblings may stay sealed. Withdrawal drops the old join and creates a replacement. Stay serial when coordination cost erases the gain.
+Every released N-way cohort needs explicit owners, compatible file/read/runtime/authority scopes, no unfinished inter-lane dependency, and one pre-created companion reconciliation vertical. Strict Work Graphs declare `topology_contract: cohort-v1`; each lane names `reconcile_via`, and the companion returns the exact set with `join_for`. A lane may become `sealed` after its own probe and review loop, but unlocks no ordinary successor. When all lanes seal, the companion runs combined probes and review, then atomically reconciles lane, join, claim, evidence, decision, and ledger state. Rejected work reactivates only affected lanes. Stay serial when coordination erases the gain.
 
 Common failures:
 
@@ -159,21 +165,20 @@ Common failures:
 - sealed work treated as verified before its join;
 - cohorts released without a durable convergence point;
 - review infrastructure recursively hardening itself;
-- automatic continuation waking without new frontier work;
 - commit-per-climb, custom locking, or global ID machinery without an observed need.
 
-The originating DACS agent-template build used ISA claims for product truth, ISA features for product decomposition, Beads for smaller execution verticals, and exact test/review snapshots for evidence. It also exposed a costly governance detour. The active run is documented in an [interim field report](https://github.com/mj-deving/graph-climbing/blob/main/case-studies/dacs-agent-template.md); the final Graph Climbing and DACS Forge engineering case studies remain separate future artifacts.
+The DACS agent-template origin used ISA claims for truth, Beads for execution, and exact test/review snapshots for evidence. The active run has an [interim field report](https://github.com/mj-deving/graph-climbing/blob/main/case-studies/dacs-agent-template.md); final Graph Climbing and DACS Forge studies remain separate.
 
 ## 9. First actions and falsification
 
 Start now:
 
-1. Inspect repository instructions, existing product authority, tracker, Git state, tests, evidence, and relevant external pins.
+1. Inspect instructions, product authority, tracker, Git, tests, evidence, and external pins.
 2. Name the authority map. Adopt an adequate existing product authority; create one small repository-native spec only when none exists.
-3. Preserve human intent, boundaries, stable atomic claims, dependencies, probes, status, decisions, and evidence. Keep material unresolved semantics `unknown` and outside the frontier.
+3. Preserve intent, boundaries, stable atomic claims, dependencies, probes, status, decisions, and evidence. Keep unresolved semantics `unknown` and outside the frontier.
 4. Derive and report `claim_frontier`, `frontier_kind`, and `active_frontier`.
 5. Select one bounded vertical and its first falsifying probe. Add no ledger unless the scaling conditions already exist.
-6. Execute one climb, reconcile durable truth, derive again, and continue while reachable work remains.
+6. Execute one climb, reconcile, derive again, and continue while reachable work remains.
 
 Graph Climbing is failing when a fresh operator cannot reconstruct the frontier, claims close without matching evidence, review findings change truth without verification, spec and ledger compete, coordination costs more than parallel work returns, or a strong agent must remember state absent from durable artifacts. Track closure integrity, reopen rate, spec-ledger divergence, time to derive the next frontier, review yield, and governance overhead. Change the protocol only when those observations justify it.
 
