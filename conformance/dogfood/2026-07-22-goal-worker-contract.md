@@ -227,6 +227,15 @@ Accepted finding:
 
 - The Gist still said only “preserves workspace or transfers local state,” weaker than the normative exclusive-acquire-or-full-transfer-and-disposition clause. Correction: the complete handoff clause is now retained in the executable Gist prompt; word-budget savings came only from non-normative origin prose.
 
+## Final-bundle Codex Round 006
+
+Snapshot: commit `65b920e`; full bundle from `540a308`.
+
+Accepted finding and live disposition:
+
+- The contract required atomic incarnation/workspace/hash binding but documented only `bd update <id> --claim`. Live Beads is v1.1.0 in direct mode. Source at tag `v1.1.0` shows direct `cmd/bd/update.go` performs `ClaimIssue` before separate regular metadata updates, so `--claim --set-metadata` is not a single CAS. The atomic `ClaimIssue` does bind actor as assignee plus `in_progress`.
+- Correction: the central release owner pre-binds immutable vertical, envelope hash, workspace, and epoch before Ready. Every runtime uses a unique incarnation as explicit Beads actor; `bd update <id> --claim --actor <incarnation> --json` atomically binds it as assignee. Workers re-read all pre-bound fields after claim. The contract no longer claims atomic claim-time metadata support.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
