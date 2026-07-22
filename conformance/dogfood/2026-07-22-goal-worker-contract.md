@@ -22,7 +22,7 @@ Can one task-free `/goal` contract be given unchanged to N Graph Climbing worker
 - OpenAI's long-running Codex guidance treats durable work as state outside the chat and asks goals to state behavior, constraints, review criteria, and a testable definition of done. The contract therefore reconstructs state and defines gates instead of embedding a mutable task. Source: [Codex-maxxing for long-running work](https://cdn.openai.com/pdf/8a9f00cf-d379-4e20-b06f-dd7ba5196a11/OAI_WhitePaper_Codex-maxxing26.pdf).
 - OpenAI describes worktrees as isolated copies that reduce conflicts between simultaneous agents. The release envelope therefore names checkout policy and mutation authority. Source: [Introducing the Codex app](https://openai.com/index/introducing-the-codex-app/).
 - Anthropic reports that multi-agent systems need explicit objectives, boundaries, outputs, and coordination; vague delegation causes duplicated or missing work. The graph supplies those specifics per leased vertical, while the goal stays identical. Source: [How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system).
-- CAID identifies concurrent edits, dependencies, and integration as central multi-agent coding conflicts and uses centralized delegation, isolated workspaces, structured integration, and executable tests. Graph Climbing maps these to atomic ledger claims, release scopes, companion joins, and probes. Source: [Conflict-Aware Inter-Agent Delegation](https://arxiv.org/abs/2603.21489).
+- *Effective Strategies for Asynchronous Software Engineering Agents* identifies concurrent edits, dependencies, and integration as central multi-agent coding conflicts and proposes Centralized Asynchronous Isolated Delegation (CAID), structured integration, and executable tests. Graph Climbing maps these to atomic ledger claims, release scopes, companion joins, and probes. Source: [Effective Strategies for Asynchronous Software Engineering Agents](https://arxiv.org/abs/2603.21489).
 - Runtime-Structured Task Decomposition argues that a monolithic prompt is brittle and that decomposition needs executable control logic and schema validation. The goal therefore defines a repeated state transition; the graph supplies the mutable task data. Source: [Runtime-Structured Task Decomposition](https://arxiv.org/abs/2605.15425).
 
 These sources support the control requirements, not the claim that this exact contract is generally optimal.
@@ -109,6 +109,15 @@ Accepted findings:
 
 - The compact Gist ambiguously allowed old leases or seals to be merely paused. Correction: workers pause or terminate; every prior lease, seal, reservation, and join must reconcile or withdraw before epoch publication.
 - Epoch/hash resume was accidentally unconditional and broke the supported ledgerless single-writer profile. Correction: the check applies to ledger leases. A proven single writer may resume its runtime-local lease or reconstruct partial work from product authority, Git, and evidence after context loss.
+
+## Fable Pass 001
+
+Snapshot: commit `71ca745`; engine `claude-fable-5`; one full branch-bundle pass.
+
+Accepted findings:
+
+- The Round 005 correction still required epoch/hash binding for a single writer using a ledger, although epochs existed only in the N-worker profile. Correction: the contract now resolves three profiles explicitly. `serial-ledger` resumes and claims exact IDs without an epoch; only `N-worker-epoch` requires epoch/hash binding.
+- arXiv `2603.21489` was cited under an incorrect title and CAID expansion. Correction: the provenance now uses the paper's actual title, *Effective Strategies for Asynchronous Software Engineering Agents*, and expands CAID as Centralized Asynchronous Isolated Delegation.
 
 ## Falsifiers
 
