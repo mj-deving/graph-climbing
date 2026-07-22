@@ -60,6 +60,7 @@ Add an Execution Graph and one operational ledger only when work must survive lo
 ## Repository contents
 
 - [`GRAPH-CLIMBING.md`](GRAPH-CLIMBING.md): canonical, standalone protocol and copy-paste prompt.
+- [`docs/terminology.md`](docs/terminology.md): mechanism-specific terminology and source map.
 - [`starter/SPEC.md`](starter/SPEC.md): neutral ISA-inspired specification scaffold.
 - [`starter/CLAIM-CHECKLIST.md`](starter/CLAIM-CHECKLIST.md): atomicity and falsification checks.
 - [`skills/graph-climbing`](skills/graph-climbing/SKILL.md): optional portable skill.

@@ -28,6 +28,8 @@ Use repository-native artifacts. Do not install an orchestration platform merely
 
 An Ideal State Artifact (ISA), PRD, or repository-native spec can implement the claim graph. Beads, GitHub Issues, or another tracker can implement the optional ledger. Goals, hooks, schedulers, and supervisors can support liveness or enforcement. None is a prerequisite.
 
+Terminology boundary: Graph Climbing names its authority, frontier, evidence, and reconciliation profile. Use mechanism-specific established terms for execution and verification. A router or routing function selects a conditional branch. Fan-out/fan-in is the general shape; use scatter-gather only when one request is distributed and responses are aggregated, and fork-join when a parent computation forks subtasks and later joins them. Pipeline means staged composition; say pipelined execution only when stages overlap. Independent verifier fan-out is not automatically self-consistency, multi-agent debate, Mixture-of-Agents, Reflexion, or Self-Refine. See the [terminology and source map](https://github.com/mj-deving/graph-climbing/blob/main/docs/terminology.md).
+
 ## 3. Kernel and authority
 
 ```text
