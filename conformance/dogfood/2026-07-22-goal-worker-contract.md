@@ -261,6 +261,18 @@ Accepted findings:
 
 Correction: recovery now freezes claims; ledgerless reconciliation uses product truth, Git, evidence, and its snapshot record without a lease; only an applicable epoch is verified; and normal handoff exclusively acquires the original workspace while any transfer routes through stopped-writer recovery and a new pre-bound lease.
 
+## Final-bundle Codex Round 009
+
+Snapshot: commit `9280886`; full bundle from `540a308`.
+
+Accepted findings and live disposition:
+
+- Recovery rotated the old lease before replaying an eligible incomplete reconciliation record, making safe completion impossible in the commit-before-close crash window.
+- Gist handoff omitted proof that no reconciliation remained in flight.
+- The concrete Beads close command omitted the required reconciliation and commit links. Installed Beads v1.1.0 supports durable `close_reason` through `--reason` and `--reason-file`; its protocol tests verify round-trip persistence.
+
+Correction: stopped-writer recovery now freezes claims and first replays or dispositions incomplete records while their exact leases remain active. Successful replay closes without replacement; rotation occurs only if work remains. Handoff retains the reconciliation fence. The Beads recipe persists both links in `close_reason` on the exact close command.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
