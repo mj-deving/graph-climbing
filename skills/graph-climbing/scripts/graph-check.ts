@@ -16,6 +16,7 @@ export interface ParsedSpec {
   slices: GraphNode[];
   currentSlice: string | null;
   topologyContract: string | null;
+  epochCandidates: string[] | null;
   issues: string[];
   warnings: string[];
 }
@@ -88,6 +89,8 @@ export function parseSpec(text: string): ParsedSpec {
   let currentSliceLine: number | null = null;
   let topologyContract: string | null = null;
   let topologyContractLine: number | null = null;
+  let epochCandidates: string[] | null = null;
+  let epochCandidatesLine: number | null = null;
   let fence: Fence | null = null;
 
   const lines = text.split(/\r?\n/);
@@ -175,10 +178,21 @@ export function parseSpec(text: string): ParsedSpec {
           topologyContractLine = index + 1;
         }
       }
+      const admitted = line.match(/^epoch_candidates:\s*(.+?)\s*$/);
+      if (admitted) {
+        if (epochCandidatesLine !== null) {
+          issues.push(`duplicate_epoch_candidates at lines ${epochCandidatesLine} and ${index + 1}`);
+        } else {
+          epochCandidates = parseList(admitted[1]);
+          epochCandidatesLine = index + 1;
+        }
+      }
     } else if (/^current_slice:\s*(.+?)\s*$/.test(line)) {
       issues.push(`current_slice_outside_work_graph at line ${index + 1}`);
     } else if (/^topology_contract:\s*(.+?)\s*$/.test(line)) {
       issues.push(`topology_contract_outside_work_graph at line ${index + 1}`);
+    } else if (/^epoch_candidates:\s*(.+?)\s*$/.test(line)) {
+      issues.push(`epoch_candidates_outside_work_graph at line ${index + 1}`);
     }
 
     if (current) {
@@ -193,7 +207,7 @@ export function parseSpec(text: string): ParsedSpec {
 
   if (fence !== null) issues.push("unclosed_code_fence");
 
-  return { sections, claims, slices, currentSlice, topologyContract, issues, warnings };
+  return { sections, claims, slices, currentSlice, topologyContract, epochCandidates, issues, warnings };
 }
 
 function emptyValue(value: string | undefined): boolean {
@@ -311,6 +325,9 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
 
   if (spec.topologyContract !== null && !strictCohortTopology) {
     errors.push(`unsupported_topology_contract: ${spec.topologyContract}`);
+  }
+  if (spec.epochCandidates !== null && !strictCohortTopology) {
+    errors.push("epoch_candidates_requires_topology_contract: cohort-v1");
   }
 
   const claimDependenciesVerified = (claim: GraphNode): boolean =>
@@ -679,6 +696,32 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
   });
   const activeFrontier = [...new Set([...reachableActive, ...ready].map((slice) => slice.id))].sort();
 
+  const epochCandidateIds = spec.epochCandidates ?? [];
+  for (const duplicate of duplicates(epochCandidateIds)) errors.push(`duplicate_epoch_candidate: ${duplicate}`);
+  for (const id of epochCandidateIds) {
+    if (!sliceById.has(id)) errors.push(`unknown_epoch_candidate: ${id}`);
+    else if (sliceById.get(id)?.fields.status?.toLowerCase() === "dropped") {
+      errors.push(`dropped_epoch_candidate: ${id}`);
+    }
+  }
+  if (spec.epochCandidates !== null) {
+    const required = new Set([...active, ...ready, ...spec.slices.filter((item) =>
+      item.fields.status?.toLowerCase() === "sealed" && reconciliationTarget(item) !== null
+    )].map((slice) => slice.id));
+    for (const join of liveJoins) {
+      const members = parseList(join.fields.join_for);
+      if (epochCandidateIds.includes(join.id) || members.some((id) => epochCandidateIds.includes(id) || required.has(id))) {
+        required.add(join.id);
+        for (const id of members) required.add(id);
+      }
+    }
+    for (const id of required) {
+      const slice = sliceById.get(id);
+      if (!slice || slice.fields.status?.toLowerCase() === "dropped") continue;
+      if (!epochCandidateIds.includes(slice.id)) errors.push(`${slice.id}: executable_or_reserved_but_not_epoch_admitted`);
+    }
+  }
+
   for (const slice of active) {
     if (emptyValue(slice.fields.owner) || slice.fields.owner?.toLowerCase() === "none") {
       errors.push(`${slice.id}: active_without_owner`);
@@ -712,11 +755,16 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
   }
 
   const scopeCheckedPairs = new Set<string>();
-  const checkParallelScopes = (lanes: GraphNode[], includeUnowned = false): void => {
+  const checkParallelScopes = (
+    lanes: GraphNode[],
+    includeUnowned = false,
+    skipPair: (left: GraphNode, right: GraphNode) => boolean = () => false,
+  ): void => {
     for (let leftIndex = 0; leftIndex < lanes.length; leftIndex += 1) {
       for (let rightIndex = leftIndex + 1; rightIndex < lanes.length; rightIndex += 1) {
         const left = lanes[leftIndex];
         const right = lanes[rightIndex];
+        if (skipPair(left, right)) continue;
         const pair = [left.id, right.id].sort().join("\u0000");
         if (scopeCheckedPairs.has(pair)) continue;
         scopeCheckedPairs.add(pair);
@@ -765,7 +813,31 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
   const activeCohortOutsiders = spec.slices.filter(
     (slice) => !isJoin(slice) && slice.fields.status?.toLowerCase() === "active" && !reconciliationTarget(slice),
   );
-  checkParallelScopes([...pendingCohortLanes, ...activeCohortOutsiders], strictCohortTopology);
+  const dependsTransitively = (from: GraphNode, targetId: string): boolean => {
+    const seen = new Set<string>();
+    const visit = (id: string): boolean => {
+      if (id === targetId) return true;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      const node = sliceById.get(id);
+      return node ? parseList(node.fields.depends_on).some(visit) : false;
+    };
+    return parseList(from.fields.depends_on).some(visit);
+  };
+  const ownJoinPair = (left: GraphNode, right: GraphNode): boolean =>
+    (isJoin(left) && parseList(left.fields.join_for).includes(right.id)) ||
+    (isJoin(right) && parseList(right.fields.join_for).includes(left.id));
+  const cannotOverlap = (left: GraphNode, right: GraphNode): boolean =>
+    ownJoinPair(left, right) || dependsTransitively(left, right.id) || dependsTransitively(right, left.id);
+
+  if (spec.epochCandidates !== null) {
+    const admitted = epochCandidateIds
+      .map((id) => sliceById.get(id))
+      .filter((slice): slice is GraphNode => slice !== undefined && slice.fields.status?.toLowerCase() !== "dropped");
+    checkParallelScopes(admitted, true, cannotOverlap);
+  } else {
+    checkParallelScopes([...pendingCohortLanes, ...activeCohortOutsiders], strictCohortTopology);
+  }
   const activeSlices = spec.slices.filter((slice) => slice.fields.status?.toLowerCase() === "active");
   checkParallelScopes(activeSlices);
   for (const join of activeSlices.filter(isJoin)) {

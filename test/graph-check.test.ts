@@ -899,6 +899,30 @@ describe("graph-check", () => {
     expect(overlapping.errors.some(
       (error) => error.startsWith("parallel_file_scope_collision: S-1") && error.includes("S-4"),
     )).toBe(true);
+
+    const foreignJoinOverlap = checkSpec(source.replace(
+      "- allowed_scope: [src/d/**, src/e/**]\n- runtime_scope: [tmp/join-b]",
+      "- allowed_scope: [src/a/**]\n- runtime_scope: [tmp/join-b]",
+    ));
+    expect(foreignJoinOverlap.errors.some(
+      (error) => error.startsWith("parallel_file_scope_collision: S-1") && error.includes("S-JOIN-B"),
+    )).toBe(true);
+
+    const unadmitted = checkSpec(source.replace(", S-4, S-5", ", S-5"));
+    expect(unadmitted.errors).toContain("S-4: executable_or_reserved_but_not_epoch_admitted");
+
+    const malformedAdmission = checkSpec(source.replace(
+      "S-JOIN-B]",
+      "S-JOIN-B, S-4, S-404]",
+    ));
+    expect(malformedAdmission.errors).toContain("duplicate_epoch_candidate: S-4");
+    expect(malformedAdmission.errors).toContain("unknown_epoch_candidate: S-404");
+
+    const orderedOverlap = checkSpec(source
+      .replace("- allowed_scope: [src/d/**]", "- allowed_scope: [src/a/**]")
+      .replace("### S-4: Build independent lane D\n\n- status: planned\n- satisfies: [C-4]\n- depends_on: []", "### S-4: Build independent lane D\n\n- status: planned\n- satisfies: [C-4]\n- depends_on: [S-JOIN-A]"));
+    expect(orderedOverlap.valid).toBe(true);
+    expect(orderedOverlap.activeFrontier).toEqual(["S-3", "S-5"]);
   });
 
   test("keeps sealed cohort scopes isolated from concurrent outsiders", async () => {

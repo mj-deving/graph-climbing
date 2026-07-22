@@ -61,6 +61,7 @@ Two sealed lanes release their workers without releasing their reservations; a d
 # Work Graph
 
 topology_contract: cohort-v1
+epoch_candidates: [S-1, S-2, S-3, S-JOIN-A, S-4, S-5, S-JOIN-B]
 current_slice: S-3
 
 ### S-1: Seal fast lane A

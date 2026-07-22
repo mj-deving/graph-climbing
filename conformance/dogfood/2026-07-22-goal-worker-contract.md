@@ -302,6 +302,8 @@ Expected result: the slow lane blocks the cohort join and its dependents, but no
 
 Source-blind probe: `conformance/fixtures/topology/n3-straggler-work-stealing.md` derives `[S-3, S-4, S-5]`, leaving both joins blocked. The first negative probe exposed a checker gap: unassigned future-ready cohort candidates skipped scope comparison. Correction: under `cohort-v1`, the checker now validates unowned admitted candidates against all pending reservations before claim; legacy unowned active diagnostics remain unchanged.
 
+Final-bundle review then found the admission set was still implicit: planned non-cohort candidates and future-ready foreign joins could remain unvalidated. Correction: `epoch_candidates` now explicitly names the immutable current/future-ready pool. The checker rejects unknown, dropped, duplicate, executable-but-unadmitted candidates and validates all admitted pairs except real dependency ordering and each join's intentional overlap with its own lanes.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
