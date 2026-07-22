@@ -144,6 +144,14 @@ Accepted finding:
 
 - A tombstoned old lease could no longer close its replacement, but its incomplete reconciliation record could still write stale product truth before the close step. Correction: recovery must resolve or invalidate every incomplete record before tombstoning and replacement. Commit requires the bound lease to remain active/current; tombstoned records are dispositioned as superseded and never replayed into product truth.
 
+## Post-Fable Codex Round 004
+
+Snapshot: commit `1e05be4`.
+
+Accepted finding:
+
+- An active/current check still raced with recovery because ledger and Git lack one transaction. Correction: official product truth has one declared reconciliation owner and exclusive authority workspace. Recovery/reassignment is forbidden during its commit-to-close critical section. Otherwise recovery durably stops every writer for that authority scope, freezes claims, inspects Git and incomplete records, then tombstones/reissues and resumes. A failed reconciliation enters that barrier rather than racing a live commit.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
