@@ -53,9 +53,75 @@ current_slice: S-2
 
 A vertical may contain an internal chain of dependent claims when at least one entry claim is on the claim frontier and every unfinished internal dependency is included in that vertical. External claim dependencies must already be verified.
 
-Parallel active verticals require different explicit owners and disjoint file and runtime scopes. Reconciliation remains central: workers return evidence candidates; one integrator updates the product authority and operational ledger.
+An execution edge is justified only when downstream work consumes upstream data, an artifact, verified product state, an authority decision, an external gate, or evidence required by its probe. Written order is not a dependency. A read of a file another lane changes creates an edge even when the write scopes differ.
 
-For deterministic overlap checks, parallel scopes use repo-relative POSIX names/paths, a terminal `/**` for recursive directory ownership, or `*`/`**` for intentionally global ownership. Root escapes, absolute paths, backslashes, and other glob syntax are rejected instead of being treated as proven isolation.
+## Select topology without changing truth
+
+The claim graph remains invariant while execution may be serial, pipelined, routed, or fan-out/fan-in:
+
+- use serial execution for causal coupling or shared authority;
+- pipeline item-local stages when no stage needs the complete upstream set;
+- use fan-out/fan-in for isolated product lanes converging on one snapshot;
+- route only from validated observed output;
+- run read-only verifier fan-out against one immutable snapshot.
+
+A barrier is justified by a cross-set operation, combined authority decision, shared release, or central reconciliation. Deterministic flattening, filtering, and deduplication belong in code.
+
+## N-way companion reconciliation
+
+Parallel released verticals require explicit owners, disjoint file and runtime scopes, no unfinished dependency between lanes, and one pre-created companion reconciliation vertical. Owner identity and staggered activation do not remove the join requirement.
+
+New graphs opt into mechanical enforcement with `topology_contract: cohort-v1` directly below `# Work Graph`. Existing graphs without it remain readable and receive a warning when several lanes appear released; migrate in-flight work at its next safe boundary.
+
+`sealed` means a cohort lane has a clean reviewed evidence candidate but is not integrated product truth. It unlocks no ordinary successor. `join_for` marks the one reconciliation vertical covering the complete released set:
+
+```markdown
+topology_contract: cohort-v1
+current_slice: S-JOIN
+
+### S-2: Build one isolated lane
+
+- status: sealed
+- satisfies: [C-2]
+- depends_on: []
+- reconcile_via: S-JOIN
+- owner: worker-2
+- allowed_scope: [src/two/**]
+- runtime_scope: [tmp/two]
+- external_gates: []
+
+### S-JOIN: Integrate and reconcile the cohort
+
+- status: planned
+- satisfies: [C-2, C-3]
+- depends_on: [S-2, S-3]
+- join_for: [S-2, S-3]
+- owner: none
+- allowed_scope: [*]
+- runtime_scope: [tmp/integration]
+- external_gates: []
+```
+
+The join rules are cardinality-independent:
+
+- `join_for` contains at least two distinct existing non-join lanes and exactly equals `depends_on`;
+- every non-dropped member names that join with `reconcile_via`, making independent cohorts durable and preventing status changes from redefining membership;
+- `satisfies` exactly equals the union of cohort claims, never a superset;
+- a lane belongs to one live join; independent release sets may have separate joins;
+- no cohort lane has a direct or transitive unfinished dependency on another member;
+- unfinished claim-graph dependencies between member lanes are equally invalid;
+- the join enters the frontier only after every cohort lane is sealed;
+- cohort completion is one atomic owning-surface update verifying lanes, join, and exactly the covered claims;
+- verified lanes and their join share one snapshot-bound `completion_evidence`; later claim reopens retain new finding evidence without erasing that historical completion;
+- a rejected candidate returns its lane to active and the join to planned while unaffected siblings remain sealed;
+- withdrawal drops the old lane/join as history and pre-creates a replacement join; a remaining singleton reactivates and reconciles serially;
+- cohort-dependent successors block on the join, not only a lane.
+
+Existing in-flight parallel work may add its companion at the next safe boundary without interrupting an active review. New cohorts create it before release. Reconciliation remains central: workers return evidence candidates; one integrator updates product authority and operational state.
+
+The contract remains installed after a join, but a single released lane may still execute serially without `reconcile_via`. Pending cohort scopes remain isolated across cohorts and from concurrent active outsiders. An active join is checked against foreign pending cohorts and active work; overlap with its own sealed inputs is the intended integration operation.
+
+For deterministic overlap checks, parallel scopes use repo-relative POSIX paths, a terminal `/**` for recursive ownership, or `*`/`**` for intentionally global ownership. Root escapes, absolute paths, backslashes, and other glob syntax are rejected.
 
 ## Evidence
 

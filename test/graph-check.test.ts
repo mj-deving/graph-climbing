@@ -71,6 +71,10 @@ Users can save local notes safely.
 - C-1: commit:abc123
 `;
 
+async function topologyFixture(name: string): Promise<string> {
+  return Bun.file(new URL(`../conformance/fixtures/topology/${name}.md`, import.meta.url)).text();
+}
+
 describe("parseList", () => {
   test("parses bracket lists and empty values", () => {
     expect(parseList("[C-1, C-2]")).toEqual(["C-1", "C-2"]);
@@ -491,22 +495,48 @@ describe("graph-check", () => {
     expect(report.errors.some((error) => error.startsWith("parallel_"))).toBe(false);
   });
 
+  test("preserves legacy same-owner active-slice serialization", () => {
+    const legacy = base
+      .replace("status: verified\n- depends_on: []", "status: open\n- depends_on: []")
+      .replace("evidence: commit:abc123", "evidence: none")
+      .replace("depends_on: [C-1]\n- probe: bun test test/invalid.test.ts", "depends_on: []\n- probe: bun test test/invalid.test.ts")
+      .replace("status: verified\n- satisfies: [C-1]", "status: active\n- satisfies: [C-1]")
+      .replace("owner: none\n- allowed_scope: [src/store.ts]", "owner: one-worker\n- allowed_scope: [src/shared.ts]")
+      .replace("status: planned\n- satisfies: [C-2]", "status: active\n- satisfies: [C-2]")
+      .replace("depends_on: [S-1]", "depends_on: []")
+      .replace("owner: none\n- allowed_scope: [src/cli.ts]", "owner: one-worker\n- allowed_scope: [src/shared.ts]");
+    const report = checkSpec(legacy);
+    expect(report.errors.some((error) => error.startsWith("parallel_"))).toBe(false);
+    expect(report.warnings).toContain("legacy_parallel_release_without_topology_contract: cohort join not enforced");
+  });
+
   test("allows parallel verticals only with disjoint file and runtime scopes", () => {
     const parallel = base
+      .replace("# Work Graph\ncurrent_slice: S-2", "# Work Graph\ntopology_contract: cohort-v1\ncurrent_slice: S-2")
       .replace("status: verified\n- depends_on: []", "status: open\n- depends_on: []")
       .replace("evidence: commit:abc123", "evidence: none")
       .replace("depends_on: [C-1]\n- probe: bun test test/invalid.test.ts", "depends_on: []\n- probe: bun test test/invalid.test.ts")
       .replace("status: verified\n- satisfies: [C-1]", "status: active\n- satisfies: [C-1]")
       .replace(
         "owner: none\n- allowed_scope: [src/store.ts]\n- external_gates: []",
-        "owner: worker-1\n- allowed_scope: [src/store/**]\n- runtime_scope: [tmp/store-1]\n- external_gates: []",
+        "reconcile_via: S-JOIN\n- owner: worker-1\n- allowed_scope: [src/store/**]\n- runtime_scope: [tmp/store-1]\n- external_gates: []",
       )
       .replace("status: planned\n- satisfies: [C-2]", "status: active\n- satisfies: [C-2]")
       .replace("depends_on: [S-1]", "depends_on: []")
       .replace(
         "owner: none\n- allowed_scope: [src/cli.ts]\n- external_gates: []",
-        "owner: worker-2\n- allowed_scope: [src/cli/**]\n- runtime_scope: [tmp/cli-2]\n- external_gates: []",
-      );
+        "reconcile_via: S-JOIN\n- owner: worker-2\n- allowed_scope: [src/cli/**]\n- runtime_scope: [tmp/cli-2]\n- external_gates: []",
+      ) + `
+### S-JOIN: Integrate both active lanes
+- status: planned
+- satisfies: [C-1, C-2]
+- depends_on: [S-1, S-2]
+- join_for: [S-1, S-2]
+- owner: none
+- allowed_scope: [*]
+- runtime_scope: [tmp/integration]
+- external_gates: []
+`;
     const disjoint = checkSpec(parallel);
     expect(disjoint.valid).toBe(true);
     expect(disjoint.activeFrontier).toEqual(["S-1", "S-2"]);
@@ -574,5 +604,449 @@ describe("graph-check", () => {
     const report = checkSpec(dependent);
     expect(report.activeFrontier).toEqual(["S-2"]);
     expect(report.blocked).toContain("S-3");
+  });
+
+  for (const [name, lanes] of [["n2-sealed-join-ready", 2], ["n3-sealed-join-ready", 3], ["n4-sealed-join-ready", 4]] as const) {
+    test(`derives one ready companion join for N=${lanes}`, async () => {
+      const report = checkSpec(await topologyFixture(name));
+      expect(report.valid).toBe(true);
+      expect(report.activeFrontier).toEqual(["S-JOIN"]);
+      expect(report.blocked).toEqual([]);
+    });
+  }
+
+  test("rejects a released parallel cohort without a companion join", async () => {
+    const source = await topologyFixture("missing-companion-join");
+    const report = checkSpec(source);
+    expect(report.valid).toBe(false);
+    expect(report.errors).toContain("S-1: released_lane_without_reconcile_via");
+    expect(report.errors).toContain("S-2: released_lane_without_reconcile_via");
+
+    const sameOwner = checkSpec(source.replace("owner: worker-two", "owner: worker-one"));
+    expect(sameOwner.errors).toContain("S-1: released_lane_without_reconcile_via");
+
+    const staggered = checkSpec(source.replace("### S-1: Build the first behavior\n\n- status: active", "### S-1: Build the first behavior\n\n- status: sealed"));
+    expect(staggered.errors).toContain("S-1: released_lane_without_reconcile_via");
+  });
+
+  test("rejects a successor that bypasses central cohort reconciliation", async () => {
+    const report = checkSpec(await topologyFixture("successor-bypasses-join"));
+    expect(report.valid).toBe(false);
+    expect(report.errors).toContain("S-NEXT: cohort_successor_bypasses_join S-JOIN");
+    expect(report.activeFrontier).toEqual(["S-JOIN"]);
+  });
+
+  test("allows one rejected lane to re-enter active work while siblings remain sealed", async () => {
+    const rework = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("current_slice: S-JOIN", "current_slice: S-1")
+      .replace("### S-1: Implement parser compatibility\n\n- status: sealed", "### S-1: Implement parser compatibility\n\n- status: active");
+    const report = checkSpec(rework);
+    expect(report.valid).toBe(true);
+    expect(report.activeFrontier).toEqual(["S-1"]);
+    expect(report.blocked).toEqual(["S-JOIN"]);
+  });
+
+  test("allows the companion join to activate only after every lane seals", async () => {
+    const source = await topologyFixture("n2-sealed-join-ready");
+    const activeJoin = source
+      .replace("### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: planned", "### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: active")
+      .replace("- owner: none\n- allowed_scope: [*]", "- owner: integrator\n- allowed_scope: [*]");
+    const report = checkSpec(activeJoin);
+    expect(report.valid).toBe(true);
+    expect(report.activeFrontier).toEqual(["S-JOIN"]);
+
+    const premature = checkSpec(activeJoin.replace(
+      "### S-1: Implement parser compatibility\n\n- status: sealed",
+      "### S-1: Implement parser compatibility\n\n- status: active",
+    ));
+    expect(premature.errors).toContain("S-JOIN: active_before_all_cohort_lanes_sealed");
+  });
+
+  test("accepts the atomic final snapshot for lanes, join, and claims", async () => {
+    const completed = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("current_slice: S-JOIN", "current_slice: none")
+      .replaceAll("- status: open", "- status: verified")
+      .replaceAll("- evidence: none", "- evidence: commit:cohort-seal")
+      .replaceAll("- status: sealed", "- status: verified")
+      .replace("### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: planned", "### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: verified")
+      .replaceAll("- status: verified\n- satisfies:", "- status: verified\n- completion_evidence: commit:cohort-seal\n- satisfies:")
+      .replace("- owner: none\n- allowed_scope: [*]", "- owner: integrator\n- allowed_scope: [*]");
+    const report = checkSpec(completed);
+    expect(report.valid).toBe(true);
+    expect(report.counts.verifiedClaims).toBe(2);
+    expect(report.activeFrontier).toEqual([]);
+
+    const mismatched = checkSpec(completed.replace(
+      "completion_evidence: commit:cohort-seal",
+      "completion_evidence: commit:different-lane-snapshot",
+    ));
+    expect(mismatched.errors).toContain("S-1: completion_evidence_must_match S-JOIN");
+  });
+
+  test("allows serial work after a cohort-v1 join has completed", async () => {
+    const completed = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("current_slice: S-JOIN", "current_slice: S-3")
+      .replaceAll("- status: open", "- status: verified")
+      .replaceAll("- evidence: none", "- evidence: commit:cohort-seal")
+      .replaceAll("- status: sealed", "- status: verified")
+      .replace("### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: planned", "### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: verified")
+      .replaceAll("- status: verified\n- satisfies:", "- status: verified\n- completion_evidence: commit:cohort-seal\n- satisfies:")
+      .replace("- owner: none\n- allowed_scope: [*]", "- owner: integrator\n- allowed_scope: [*]")
+      .replace(
+        "# Work Graph",
+        `### C-3: Later serial report exists
+
+- status: open
+- depends_on: []
+- probe: bun test test/report.test.ts
+- evidence: none
+- invalidated_by: []
+
+# Work Graph`,
+      )
+      .replace(
+        "# Decisions",
+        `### S-3: Build the later serial report
+
+- status: active
+- satisfies: [C-3]
+- depends_on: []
+- owner: report-worker
+- allowed_scope: [src/report/**]
+- runtime_scope: [tmp/report-worker]
+- external_gates: []
+
+# Decisions`,
+      );
+    const report = checkSpec(completed);
+    expect(report.valid).toBe(true);
+    expect(report.activeFrontier).toEqual(["S-3"]);
+
+    const claimOrdered = completed
+      .replace(
+        "# Work Graph",
+        `### C-4: Report summary follows the serial report
+
+- status: open
+- depends_on: [C-3]
+- probe: bun test test/summary.test.ts
+- evidence: none
+- invalidated_by: []
+
+# Work Graph`,
+      )
+      .replace(
+        "# Decisions",
+        `### S-4: Build the later report summary
+
+- status: planned
+- satisfies: [C-4]
+- depends_on: []
+- owner: report-worker
+- allowed_scope: [src/summary/**]
+- runtime_scope: [tmp/summary-worker]
+- external_gates: []
+
+# Decisions`,
+      );
+    const orderedReport = checkSpec(claimOrdered);
+    expect(orderedReport.valid).toBe(true);
+    expect(orderedReport.errors).not.toContain("S-4: released_lane_without_reconcile_via");
+    expect(orderedReport.blocked).toContain("S-4");
+  });
+
+  test("rejects a verified join while any lane or covered claim is unverified", async () => {
+    const premature = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: planned", "### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: verified")
+      .replace("- owner: none\n- allowed_scope: [*]", "- owner: integrator\n- allowed_scope: [*]");
+    const report = checkSpec(premature);
+    expect(report.errors).toContain("S-JOIN: verified_without_completion_evidence");
+    expect(report.errors).toContain("S-JOIN: verified_with_unverified_cohort_lane S-1");
+    expect(report.errors).toContain("S-JOIN: verified_with_unverified_cohort_lane S-2");
+    expect(report.errors).toContain("C-1: reopened_after_join_without_new_evidence S-JOIN");
+    expect(report.errors).toContain("C-2: reopened_after_join_without_new_evidence S-JOIN");
+  });
+
+  test("allows one claim to reopen after snapshot-bound cohort completion", async () => {
+    const reopened = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("current_slice: S-JOIN", "current_slice: S-REOPEN")
+      .replaceAll("- status: open", "- status: verified")
+      .replaceAll("- evidence: none", "- evidence: commit:cohort-seal")
+      .replaceAll("- status: sealed", "- status: verified")
+      .replace("### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: planned", "### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: verified")
+      .replaceAll("- status: verified\n- satisfies:", "- status: verified\n- completion_evidence: commit:cohort-seal\n- satisfies:")
+      .replace("- owner: none\n- allowed_scope: [*]", "- owner: integrator\n- allowed_scope: [*]")
+      .replace("### C-1: Parser accepts the new record form\n\n- status: verified", "### C-1: Parser accepts the new record form\n\n- status: open")
+      .replace("- evidence: commit:cohort-seal", "- evidence: accepted-and-verified-review-finding:F-1@later")
+      .replace(
+        "# Decisions",
+        `### S-REOPEN: Correct the reopened parser claim
+
+- status: planned
+- satisfies: [C-1]
+- depends_on: [S-JOIN]
+- owner: none
+- allowed_scope: [src/parser/**]
+- runtime_scope: [tmp/parser-reopen]
+- external_gates: []
+
+# Decisions`,
+      );
+    const report = checkSpec(reopened);
+    expect(report.valid).toBe(true);
+    expect(report.counts.verifiedClaims).toBe(1);
+    expect(report.activeFrontier).toEqual(["S-REOPEN"]);
+  });
+
+  test("rejects a covered claim verified before its companion join", async () => {
+    const partial = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("### C-1: Parser accepts the new record form\n\n- status: open", "### C-1: Parser accepts the new record form\n\n- status: verified")
+      .replace("- evidence: none", "- evidence: commit:premature-claim");
+    expect(checkSpec(partial).errors).toContain("C-1: verified_before_companion_join S-JOIN");
+  });
+
+  test("rejects unfinished dependencies between lanes in one cohort", async () => {
+    const dependent = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("### S-2: Harden invalid-record storage\n\n- status: sealed\n- satisfies: [C-2]\n- depends_on: []", "### S-2: Harden invalid-record storage\n\n- status: sealed\n- satisfies: [C-2]\n- depends_on: [S-1]");
+    expect(checkSpec(dependent).errors).toContain("S-2: unfinished_dependency_within_cohort S-1");
+
+    const claimDependent = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("### C-2: Anti: Invalid records mutate no stored state\n\n- status: open\n- depends_on: []", "### C-2: Anti: Invalid records mutate no stored state\n\n- status: open\n- depends_on: [C-1]");
+    expect(checkSpec(claimDependent).errors).toContain("S-2: unfinished_claim_dependency_within_cohort C-1");
+  });
+
+  test("keeps independent declared cohorts separate and rejects an undeclared active outsider", async () => {
+    const source = await topologyFixture("n4-sealed-join-ready");
+    const twoCohorts = source
+      .replaceAll("- reconcile_via: S-JOIN", "- reconcile_via: S-JOIN-A")
+      .replace("current_slice: S-JOIN", "current_slice: S-JOIN-A")
+      .replace("### S-JOIN: Integrate and reconcile the four-lane cohort", "### S-JOIN-A: Reconcile the first cohort")
+      .replace("- satisfies: [C-1, C-2, C-3, C-4]\n- depends_on: [S-1, S-2, S-3, S-4]\n- join_for: [S-1, S-2, S-3, S-4]", "- satisfies: [C-1, C-2]\n- depends_on: [S-1, S-2]\n- join_for: [S-1, S-2]")
+      .replace("### S-3: Prove recovery behavior\n\n- status: sealed\n- satisfies: [C-3]\n- depends_on: []\n- reconcile_via: S-JOIN-A", "### S-3: Prove recovery behavior\n\n- status: sealed\n- satisfies: [C-3]\n- depends_on: []\n- reconcile_via: S-JOIN-B")
+      .replace("### S-4: Harden log redaction\n\n- status: sealed\n- satisfies: [C-4]\n- depends_on: []\n- reconcile_via: S-JOIN-A", "### S-4: Harden log redaction\n\n- status: sealed\n- satisfies: [C-4]\n- depends_on: []\n- reconcile_via: S-JOIN-B")
+      .replace(
+        "# Decisions",
+        `### S-JOIN-B: Reconcile the second cohort
+
+- status: planned
+- satisfies: [C-3, C-4]
+- depends_on: [S-3, S-4]
+- join_for: [S-3, S-4]
+- owner: none
+- allowed_scope: [*]
+- runtime_scope: [tmp/integration-b]
+- external_gates: []
+
+# Decisions`,
+      );
+    const cohortReport = checkSpec(twoCohorts);
+    expect(cohortReport.valid).toBe(true);
+    expect(cohortReport.activeFrontier).toEqual(["S-JOIN-A", "S-JOIN-B"]);
+
+    const activeFirstJoin = twoCohorts
+      .replace("### S-JOIN-A: Reconcile the first cohort\n\n- status: planned", "### S-JOIN-A: Reconcile the first cohort\n\n- status: active")
+      .replace("- owner: none\n- allowed_scope: [*]", "- owner: integrator-a\n- allowed_scope: [*]");
+    expect(checkSpec(activeFirstJoin).errors.some(
+      (error) => error.startsWith("parallel_file_scope_collision: S-JOIN-A") && error.includes("S-3"),
+    )).toBe(true);
+
+    const withSerial = (await topologyFixture("n2-sealed-join-ready"))
+      .replace(
+        "# Work Graph",
+        `### C-3: Independent serial report exists
+
+- status: open
+- depends_on: []
+- probe: bun test test/report.test.ts
+- evidence: none
+- invalidated_by: []
+
+# Work Graph`,
+      )
+      .replace(
+        "# Decisions",
+        `### S-3: Build an unrelated serial report
+
+- status: active
+- satisfies: [C-3]
+- depends_on: []
+- owner: report-worker
+- allowed_scope: [src/report/**]
+- runtime_scope: [tmp/report-worker]
+- external_gates: []
+
+# Decisions`,
+      );
+    const serialReport = checkSpec(withSerial);
+    expect(serialReport.valid).toBe(false);
+    expect(serialReport.errors).toContain("S-3: released_lane_without_reconcile_via");
+    expect(serialReport.activeFrontier).toEqual(["S-3", "S-JOIN"]);
+  });
+
+  test("keeps sealed cohort scopes isolated from concurrent outsiders", async () => {
+    const overlapping = (await topologyFixture("n2-sealed-join-ready"))
+      .replace(
+        "# Work Graph",
+        `### C-3: Concurrent parser report exists
+
+- status: open
+- depends_on: []
+- probe: bun test test/report.test.ts
+- evidence: none
+- invalidated_by: []
+
+# Work Graph`,
+      )
+      .replace(
+        "# Decisions",
+        `### S-3: Mutate a sealed parser scope
+
+- status: active
+- satisfies: [C-3]
+- depends_on: []
+- owner: report-worker
+- allowed_scope: [src/parser/**]
+- runtime_scope: [tmp/report-worker]
+- external_gates: []
+
+# Decisions`,
+      );
+    const report = checkSpec(overlapping);
+    expect(report.errors).toContain("S-3: released_lane_without_reconcile_via");
+    expect(report.errors.some((error) => error.startsWith("parallel_file_scope_collision: S-1"))).toBe(true);
+  });
+
+  test("checks an active companion join against other active writers", async () => {
+    const concurrent = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: planned", "### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: active")
+      .replace("- owner: none\n- allowed_scope: [*]", "- owner: integrator\n- allowed_scope: [*]")
+      .replace(
+        "# Work Graph",
+        `### C-3: Independent report exists
+
+- status: open
+- depends_on: []
+- probe: bun test test/report.test.ts
+- evidence: none
+- invalidated_by: []
+
+# Work Graph`,
+      )
+      .replace(
+        "# Decisions",
+        `### S-3: Build a concurrent report
+
+- status: active
+- satisfies: [C-3]
+- depends_on: []
+- owner: report-worker
+- allowed_scope: [src/report/**]
+- runtime_scope: [tmp/report-worker]
+- external_gates: []
+
+# Decisions`,
+      );
+    const report = checkSpec(concurrent);
+    expect(report.errors.some((error) => error.startsWith("parallel_file_scope_collision: S-JOIN"))).toBe(true);
+  });
+
+  test("rejects a verified cohort lane while its companion join is unfinished", async () => {
+    const premature = (await topologyFixture("n2-sealed-join-ready"))
+      .replaceAll("- status: open", "- status: verified")
+      .replaceAll("- evidence: none", "- evidence: commit:premature")
+      .replaceAll("- status: sealed", "- status: verified");
+    const report = checkSpec(premature);
+    expect(report.errors).toContain("S-1: verified_before_companion_join");
+    expect(report.errors).toContain("S-2: verified_before_companion_join");
+  });
+
+  test("rejects degenerate, mismatched, and claim-superset joins", async () => {
+    const source = await topologyFixture("n2-sealed-join-ready");
+    const n1 = checkSpec(source
+      .replace("- depends_on: [S-1, S-2]\n- join_for: [S-1, S-2]", "- depends_on: [S-1]\n- join_for: [S-1]")
+      .replace("- satisfies: [C-1, C-2]", "- satisfies: [C-1]"));
+    expect(n1.errors).toContain("S-JOIN: companion_join_requires_at_least_two_lanes");
+
+    const mismatch = checkSpec(source.replace("- join_for: [S-1, S-2]", "- join_for: [S-2, S-1, S-1]"));
+    expect(mismatch.errors).toContain("S-JOIN: duplicate_join_lane S-1");
+
+    const unequal = checkSpec(source.replace("- join_for: [S-1, S-2]", "- join_for: [S-1, S-404]"));
+    expect(unequal.errors).toContain("S-JOIN: join_for_must_equal_depends_on");
+
+    const self = checkSpec(source.replace("- join_for: [S-1, S-2]", "- join_for: [S-1, S-JOIN]"));
+    expect(self.errors).toContain("S-JOIN: companion_join_cannot_include_itself");
+
+    const superset = checkSpec(source.replace("- satisfies: [C-1, C-2]", "- satisfies: [C-1, C-2, C-404]"));
+    expect(superset.errors).toContain("S-JOIN: join_satisfies_must_equal_cohort_claim_union");
+  });
+
+  test("rejects nested companion joins", async () => {
+    const nested = (await topologyFixture("n2-sealed-join-ready")).replace(
+      "# Decisions",
+      `### S-NEST: Invalid nested reconciliation
+
+- status: planned
+- satisfies: [C-1, C-2]
+- depends_on: [S-JOIN, S-2]
+- join_for: [S-JOIN, S-2]
+- owner: none
+- allowed_scope: [*]
+- runtime_scope: [tmp/nested]
+- external_gates: []
+
+# Decisions`,
+    );
+    const report = checkSpec(nested);
+    expect(report.errors).toContain("S-NEST: nested_companion_join S-JOIN");
+  });
+
+  test("checks scope isolation even when cohort lanes share one owner", async () => {
+    const source = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("owner: worker-store", "owner: worker-parser");
+    expect(checkSpec(source).valid).toBe(true);
+
+    const collision = checkSpec(source.replace("src/store/**", "src/parser/**"));
+    expect(collision.errors.some((error) => error.startsWith("parallel_file_scope_collision:"))).toBe(true);
+  });
+
+  test("allows a dropped lane and join to be replaced by a smaller live cohort", async () => {
+    const rescope = (await topologyFixture("n3-sealed-join-ready"))
+      .replace("current_slice: S-JOIN", "current_slice: S-JOIN2")
+      .replaceAll("- reconcile_via: S-JOIN", "- reconcile_via: S-JOIN2")
+      .replace("### C-2: Output encoding remains deterministic", "### C-2: Anti: Output encoding becomes non-deterministic")
+      .replace("### C-3: Anti: Diagnostics expose no secret values\n\n- status: open", "### C-3: Anti: Diagnostics expose no secret values\n\n- status: dropped")
+      .replace("### S-3: Redact diagnostics\n\n- status: sealed", "### S-3: Redact diagnostics\n\n- status: dropped")
+      .replace("### S-JOIN: Integrate and reconcile the three-lane cohort\n\n- status: planned", "### S-JOIN: Integrate and reconcile the three-lane cohort\n\n- status: dropped")
+      .replace(
+        "# Decisions",
+        `### S-JOIN2: Reconcile the remaining two-lane cohort
+
+- status: planned
+- satisfies: [C-1, C-2]
+- depends_on: [S-1, S-2]
+- join_for: [S-1, S-2]
+- owner: none
+- allowed_scope: [*]
+- runtime_scope: [tmp/integration-2]
+- external_gates: []
+
+# Decisions`,
+      );
+    const report = checkSpec(rescope);
+    expect(report.valid).toBe(true);
+    expect(report.activeFrontier).toEqual(["S-JOIN2"]);
+  });
+
+  test("returns a remaining singleton to serial execution after withdrawal", async () => {
+    const singleton = (await topologyFixture("n2-sealed-join-ready"))
+      .replace("current_slice: S-JOIN", "current_slice: S-1")
+      .replace("### S-1: Implement parser compatibility\n\n- status: sealed", "### S-1: Implement parser compatibility\n\n- status: active")
+      .replace("- satisfies: [C-1]\n- depends_on: []\n- reconcile_via: S-JOIN", "- satisfies: [C-1, C-2]\n- depends_on: []\n- reconcile_via: S-JOIN")
+      .replace("- reconcile_via: S-JOIN\n- owner: worker-parser", "- owner: worker-parser")
+      .replace("### S-2: Harden invalid-record storage\n\n- status: sealed", "### S-2: Harden invalid-record storage\n\n- status: dropped")
+      .replace("### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: planned", "### S-JOIN: Integrate and reconcile the two-lane cohort\n\n- status: dropped");
+    const report = checkSpec(singleton);
+    expect(report.valid).toBe(true);
+    expect(report.activeFrontier).toEqual(["S-1"]);
   });
 });

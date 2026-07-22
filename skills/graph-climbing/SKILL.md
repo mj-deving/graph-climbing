@@ -24,7 +24,11 @@ Operate on the repository's durable product authority, optional execution ledger
 - Treat a Work Graph as an optional scaled profile. With one, the active frontier contains executable verticals rather than claims.
 - Treat review as a falsifier. Only an accepted finding verified against the relevant snapshot may reopen or add a claim.
 - Keep uncertainty separate from verified completion.
-- Prefer one bounded vertical. Parallelize only with explicit owners and proven dependency, file, and runtime isolation.
+- Treat an edge as real only when downstream work consumes upstream data, an artifact, verified state, authority, a gate, or probe-required evidence. Written order alone is not an edge.
+- Keep the claim graph invariant while selecting serial, pipeline, router, fan-out/fan-in, or verifier execution topology.
+- Prefer one bounded vertical. Parallelize only with explicit owners and proven dependency, file/read, runtime, and authority isolation.
+- For every released N-way product cohort, opt into `topology_contract: cohort-v1` and pre-create one companion reconciliation vertical. Each lane names it with `reconcile_via`; its `join_for` returns the exact set. A sealed lane is an evidence candidate, never a verified predecessor.
+- Run the inner probe/Autoreview loop per lane and combined probes/review at the companion join. Reconcile cohort completion atomically.
 
 ## Boundaries
 

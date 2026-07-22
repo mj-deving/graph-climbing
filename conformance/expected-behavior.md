@@ -29,8 +29,12 @@ An accepted review finding reopens or adds a claim only after the finding is ver
 
 ## Scaling
 
-Short serial adoption creates no execution ledger. Brownfield adoption preserves an adequate existing product authority. Parallel writers receive separate verticals with explicit owners and disjoint file and runtime scopes; one integrator reconciles the result.
+Short serial adoption creates no execution ledger. Brownfield adoption preserves an adequate existing product authority. Order-only edges are removed. The claim graph stays invariant while execution may be serial, pipelined, routed, or fan-out/fan-in.
+
+Under `topology_contract: cohort-v1`, every released N-way product cohort has one pre-created companion reconciliation vertical over the exact set, independent of owner identity or staggered activation. Each lane durably names it with `reconcile_via`; the join returns the exact membership with `join_for`, so independent cohorts remain separate. Lanes have no unfinished Work Graph or claim-graph dependency between them and retain isolated file/read and runtime scopes across pending cohorts. A sealed lane unlocks no ordinary successor. The join enters the frontier only after every lane seals, then combined probes and review precede one atomic reconciliation of lanes, join, claims, evidence, and ledger state. Rework can reactivate one lane without discarding unaffected seals; withdrawal replaces the old join or returns a singleton to serial reconciliation.
+
+A covered claim cannot become verified before its live join. At completion, lanes and join share snapshot-bound `completion_evidence`. A later verified finding may reopen one claim with new evidence without rewriting historical execution completion. After a cohort verifies, one later released lane remains valid serial work under the persistent contract. An active join cannot overlap foreign pending cohort scopes.
 
 ## Falsifiers
 
-The implementation fails this contract if it creates competing product authorities, closes claims without evidence, treats the checker's pass as product proof, blocks unrelated local work on release-only gates, or grows governance infrastructure to supervise itself.
+The implementation fails this contract if it creates competing product authorities, closes claims without evidence, treats a seal or checker pass as product proof, lets a cohort successor bypass its join, splits one released set across joins, blocks unrelated local work on release-only gates, or grows governance infrastructure to supervise itself.

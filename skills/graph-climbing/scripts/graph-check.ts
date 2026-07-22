@@ -15,6 +15,7 @@ export interface ParsedSpec {
   claims: GraphNode[];
   slices: GraphNode[];
   currentSlice: string | null;
+  topologyContract: string | null;
   issues: string[];
   warnings: string[];
 }
@@ -45,7 +46,7 @@ const requiredSections = [
 ];
 
 const claimStatuses = new Set(["open", "verified", "blocked", "unknown", "dropped"]);
-const sliceStatuses = new Set(["planned", "active", "verified", "blocked", "unknown", "dropped"]);
+const sliceStatuses = new Set(["planned", "active", "sealed", "verified", "blocked", "unknown", "dropped"]);
 type Fence = { marker: "`" | "~"; length: number };
 
 function openingFence(line: string): Fence | null {
@@ -85,6 +86,8 @@ export function parseSpec(text: string): ParsedSpec {
   let current: GraphNode | null = null;
   let currentSlice: string | null = null;
   let currentSliceLine: number | null = null;
+  let topologyContract: string | null = null;
+  let topologyContractLine: number | null = null;
   let fence: Fence | null = null;
 
   const lines = text.split(/\r?\n/);
@@ -163,8 +166,19 @@ export function parseSpec(text: string): ParsedSpec {
           currentSliceLine = index + 1;
         }
       }
+      const contract = line.match(/^topology_contract:\s*(.+?)\s*$/);
+      if (contract) {
+        if (topologyContractLine !== null) {
+          issues.push(`duplicate_topology_contract at lines ${topologyContractLine} and ${index + 1}`);
+        } else {
+          topologyContract = clean(contract[1]);
+          topologyContractLine = index + 1;
+        }
+      }
     } else if (/^current_slice:\s*(.+?)\s*$/.test(line)) {
       issues.push(`current_slice_outside_work_graph at line ${index + 1}`);
+    } else if (/^topology_contract:\s*(.+?)\s*$/.test(line)) {
+      issues.push(`topology_contract_outside_work_graph at line ${index + 1}`);
     }
 
     if (current) {
@@ -179,7 +193,7 @@ export function parseSpec(text: string): ParsedSpec {
 
   if (fence !== null) issues.push("unclosed_code_fence");
 
-  return { sections, claims, slices, currentSlice, issues, warnings };
+  return { sections, claims, slices, currentSlice, topologyContract, issues, warnings };
 }
 
 function emptyValue(value: string | undefined): boolean {
@@ -229,6 +243,31 @@ function duplicateIds(nodes: GraphNode[]): string[] {
   return [...duplicates].sort();
 }
 
+function duplicates(values: string[]): string[] {
+  const seen = new Set<string>();
+  const repeated = new Set<string>();
+  for (const value of values) {
+    if (seen.has(value)) repeated.add(value);
+    seen.add(value);
+  }
+  return [...repeated].sort();
+}
+
+function sameSet(left: string[], right: string[]): boolean {
+  const leftSet = [...new Set(left)].sort();
+  const rightSet = [...new Set(right)].sort();
+  return leftSet.length === rightSet.length && leftSet.every((value, index) => value === rightSet[index]);
+}
+
+function isJoin(slice: GraphNode): boolean {
+  return Object.hasOwn(slice.fields, "join_for");
+}
+
+function reconciliationTarget(slice: GraphNode): string | null {
+  const target = slice.fields.reconcile_via;
+  return emptyValue(target) ? null : clean(target!);
+}
+
 type ScopePattern = { path: string; recursive: boolean };
 
 function parseScopePattern(scope: string): ScopePattern | null {
@@ -268,6 +307,42 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
   const claimById = new Map(spec.claims.map((claim) => [claim.id, claim]));
   const sliceById = new Map(spec.slices.map((slice) => [slice.id, slice]));
   const hasWorkGraph = spec.sections.has("Work Graph");
+  const strictCohortTopology = spec.topologyContract === "cohort-v1";
+
+  if (spec.topologyContract !== null && !strictCohortTopology) {
+    errors.push(`unsupported_topology_contract: ${spec.topologyContract}`);
+  }
+
+  const claimDependenciesVerified = (claim: GraphNode): boolean =>
+    parseList(claim.fields.depends_on).every(
+      (dependency) => claimById.get(dependency)?.fields.status?.toLowerCase() === "verified",
+    );
+  const claimsInternallyClosed = (slice: GraphNode): boolean => {
+    const owned = new Set(parseList(slice.fields.satisfies));
+    return [...owned].every((claimId) => {
+      const claim = claimById.get(claimId);
+      const status = claim?.fields.status?.toLowerCase();
+      if (!claim || !["open", "verified", "dropped"].includes(status ?? "")) return false;
+      if (status === "dropped") return true;
+      return parseList(claim.fields.depends_on).every((dependencyId) => {
+        const dependency = claimById.get(dependencyId);
+        const dependencyStatus = dependency?.fields.status?.toLowerCase();
+        return dependencyStatus === "verified" ||
+          (owned.has(dependencyId) && ["open", "verified"].includes(dependencyStatus ?? ""));
+      });
+    });
+  };
+  const hasReachableEntry = (slice: GraphNode): boolean => {
+    const owned = new Set(parseList(slice.fields.satisfies));
+    return [...owned].some((claimId) => {
+      const claim = claimById.get(claimId);
+      return claim?.fields.status?.toLowerCase() === "open" && claimDependenciesVerified(claim);
+    });
+  };
+  const claimsReachable = (slice: GraphNode): boolean => claimsInternallyClosed(slice) && hasReachableEntry(slice);
+  const hasOpenClaim = (slice: GraphNode): boolean => parseList(slice.fields.satisfies).some(
+    (claimId) => claimById.get(claimId)?.fields.status?.toLowerCase() === "open",
+  );
 
   if (spec.claims.length === 0) errors.push("claims_missing: Done Criteria has no parseable C-* entries");
   if (hasWorkGraph && spec.slices.length === 0) errors.push("slices_missing: Work Graph has no parseable S-* entries");
@@ -358,8 +433,200 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
       for (const claimId of satisfies) {
         const claim = claimById.get(claimId);
         if (claim && claim.fields.status?.toLowerCase() !== "verified" && claim.fields.status?.toLowerCase() !== "dropped") {
-          errors.push(`${slice.id}: verified_with_unverified_claim ${claimId}`);
+          const historicalCompletion = !emptyValue(slice.fields.completion_evidence) &&
+            !emptyValue(claim.fields.evidence) && claim.fields.evidence !== slice.fields.completion_evidence;
+          if (!historicalCompletion) errors.push(`${slice.id}: verified_with_unverified_claim ${claimId}`);
         }
+      }
+    }
+  }
+
+  const liveJoins = spec.slices.filter(
+    (slice) => isJoin(slice) && slice.fields.status?.toLowerCase() !== "dropped",
+  );
+  const liveJoinsByLane = new Map<string, GraphNode[]>();
+  const cohortLanesByJoin = new Map<string, GraphNode[]>();
+  const hasLiveCohortMetadata = liveJoins.length > 0 || spec.slices.some(
+    (slice) => slice.fields.status?.toLowerCase() !== "dropped" && reconciliationTarget(slice) !== null,
+  );
+  if (hasLiveCohortMetadata && !strictCohortTopology) {
+    errors.push("cohort_metadata_requires_topology_contract: cohort-v1");
+  }
+
+  const releasedProductLanes = spec.slices.filter((slice) => {
+    if (isJoin(slice) || slice.fields.status?.toLowerCase() === "dropped") return false;
+    const status = slice.fields.status?.toLowerCase();
+    const owner = slice.fields.owner?.toLowerCase();
+    const plannedAndReleased = status === "planned" && !emptyValue(owner) && owner !== "none" &&
+      parseList(slice.fields.depends_on).every(
+        (dependency) => sliceById.get(dependency)?.fields.status?.toLowerCase() === "verified",
+      ) && parseList(slice.fields.external_gates).length === 0 && claimsReachable(slice) && hasOpenClaim(slice);
+    return status === "active" || status === "sealed" || plannedAndReleased;
+  });
+  if (strictCohortTopology) {
+    if (releasedProductLanes.length >= 2) {
+      for (const lane of releasedProductLanes) {
+        if (!reconciliationTarget(lane)) errors.push(`${lane.id}: released_lane_without_reconcile_via`);
+      }
+    }
+  } else if (releasedProductLanes.length >= 2) {
+    warnings.push("legacy_parallel_release_without_topology_contract: cohort join not enforced");
+  }
+
+  for (const lane of spec.slices.filter((slice) => !isJoin(slice) && slice.fields.status?.toLowerCase() !== "dropped")) {
+    const target = reconciliationTarget(lane);
+    if (!target) continue;
+    const members = cohortLanesByJoin.get(target) ?? [];
+    members.push(lane);
+    cohortLanesByJoin.set(target, members);
+    const targetSlice = sliceById.get(target);
+    if (!targetSlice) errors.push(`${lane.id}: unknown_reconciliation_target ${target}`);
+    else if (!isJoin(targetSlice)) errors.push(`${lane.id}: reconciliation_target_is_not_companion_join ${target}`);
+    else if (targetSlice.fields.status?.toLowerCase() === "dropped") {
+      errors.push(`${lane.id}: reconciliation_target_is_dropped ${target}`);
+    }
+  }
+
+  for (const join of liveJoins) {
+    const cohort = parseList(join.fields.join_for);
+    const dependencies = parseList(join.fields.depends_on);
+    const repeated = duplicates(cohort);
+    if (cohort.length < 2) errors.push(`${join.id}: companion_join_requires_at_least_two_lanes`);
+    for (const duplicate of repeated) errors.push(`${join.id}: duplicate_join_lane ${duplicate}`);
+    if (cohort.includes(join.id)) errors.push(`${join.id}: companion_join_cannot_include_itself`);
+    if (!sameSet(cohort, dependencies)) errors.push(`${join.id}: join_for_must_equal_depends_on`);
+
+    const cohortClaims: string[] = [];
+    for (const laneId of [...new Set(cohort)]) {
+      const lane = sliceById.get(laneId);
+      if (!lane) {
+        errors.push(`${join.id}: unknown_join_lane ${laneId}`);
+        continue;
+      }
+      if (isJoin(lane)) errors.push(`${join.id}: nested_companion_join ${laneId}`);
+      if (lane.fields.status?.toLowerCase() === "dropped") errors.push(`${join.id}: joins_dropped_lane ${laneId}`);
+      if (reconciliationTarget(lane) !== join.id) errors.push(`${lane.id}: reconcile_via_must_name ${join.id}`);
+      cohortClaims.push(...parseList(lane.fields.satisfies));
+      const memberships = liveJoinsByLane.get(laneId) ?? [];
+      memberships.push(join);
+      liveJoinsByLane.set(laneId, memberships);
+    }
+    if (!sameSet(parseList(join.fields.satisfies), cohortClaims)) {
+      errors.push(`${join.id}: join_satisfies_must_equal_cohort_claim_union`);
+    }
+    if (join.fields.status?.toLowerCase() === "sealed") {
+      errors.push(`${join.id}: companion_join_cannot_be_sealed`);
+    }
+
+    const declaredMembers = (cohortLanesByJoin.get(join.id) ?? []).map((lane) => lane.id);
+    if (!sameSet(cohort, declaredMembers)) {
+      errors.push(`${join.id}: join_for_must_equal_reconcile_via_members`);
+    }
+
+    const cohortSet = new Set(cohort);
+    const reachesCohortLane = (startId: string, seen = new Set<string>()): string | null => {
+      const lane = sliceById.get(startId);
+      if (!lane) return null;
+      for (const dependency of parseList(lane.fields.depends_on)) {
+        if (cohortSet.has(dependency)) return dependency;
+        if (seen.has(dependency)) continue;
+        seen.add(dependency);
+        const reached = reachesCohortLane(dependency, seen);
+        if (reached) return reached;
+      }
+      return null;
+    };
+    for (const laneId of cohort) {
+      const dependency = reachesCohortLane(laneId, new Set([laneId]));
+      if (dependency) errors.push(`${laneId}: unfinished_dependency_within_cohort ${dependency}`);
+    }
+
+    const laneIdsByClaim = new Map<string, string[]>();
+    for (const laneId of cohort) {
+      for (const claimId of parseList(sliceById.get(laneId)?.fields.satisfies)) {
+        const owners = laneIdsByClaim.get(claimId) ?? [];
+        owners.push(laneId);
+        laneIdsByClaim.set(claimId, owners);
+      }
+    }
+    for (const laneId of cohort) {
+      const reported = new Set<string>();
+      const reachesOtherLaneClaim = (claimId: string, seen = new Set<string>()): string | null => {
+        const claim = claimById.get(claimId);
+        if (!claim) return null;
+        for (const dependency of parseList(claim.fields.depends_on)) {
+          const dependencyClaim = claimById.get(dependency);
+          if (dependencyClaim?.fields.status?.toLowerCase() === "verified") continue;
+          if ((laneIdsByClaim.get(dependency) ?? []).some((owner) => owner !== laneId)) return dependency;
+          if (seen.has(dependency)) continue;
+          seen.add(dependency);
+          const reached = reachesOtherLaneClaim(dependency, seen);
+          if (reached) return reached;
+        }
+        return null;
+      };
+      for (const claimId of parseList(sliceById.get(laneId)?.fields.satisfies)) {
+        const dependency = reachesOtherLaneClaim(claimId, new Set([claimId]));
+        if (dependency && !reported.has(dependency)) {
+          errors.push(`${laneId}: unfinished_claim_dependency_within_cohort ${dependency}`);
+          reported.add(dependency);
+        }
+      }
+    }
+
+    if (join.fields.status?.toLowerCase() === "verified") {
+      const completionEvidence = join.fields.completion_evidence;
+      if (emptyValue(completionEvidence)) errors.push(`${join.id}: verified_without_completion_evidence`);
+      for (const laneId of cohort) {
+        const lane = sliceById.get(laneId);
+        if (lane?.fields.status?.toLowerCase() !== "verified") {
+          errors.push(`${join.id}: verified_with_unverified_cohort_lane ${laneId}`);
+        } else if (emptyValue(completionEvidence) || lane.fields.completion_evidence !== completionEvidence) {
+          errors.push(`${laneId}: completion_evidence_must_match ${join.id}`);
+        }
+      }
+      for (const claimId of parseList(join.fields.satisfies)) {
+        const claim = claimById.get(claimId);
+        if (claim?.fields.status?.toLowerCase() !== "verified" && (
+          emptyValue(claim?.fields.evidence) || claim?.fields.evidence === completionEvidence
+        )) {
+          errors.push(`${claimId}: reopened_after_join_without_new_evidence ${join.id}`);
+        }
+      }
+    } else {
+      for (const claimId of parseList(join.fields.satisfies)) {
+        if (claimById.get(claimId)?.fields.status?.toLowerCase() === "verified") {
+          errors.push(`${claimId}: verified_before_companion_join ${join.id}`);
+        }
+      }
+    }
+  }
+
+  for (const [laneId, joins] of liveJoinsByLane) {
+    if (joins.length > 1) {
+      errors.push(`${laneId}: multiple_live_companion_joins ${joins.map((join) => join.id).sort().join(",")}`);
+    }
+  }
+
+  for (const slice of spec.slices.filter((item) => !isJoin(item))) {
+    const status = slice.fields.status?.toLowerCase();
+    const joins = liveJoinsByLane.get(slice.id) ?? [];
+    if (status === "sealed" && joins.length !== 1) {
+      errors.push(`${slice.id}: sealed_without_one_live_companion_join`);
+    }
+    if (status === "verified" && joins.some((join) => join.fields.status?.toLowerCase() !== "verified")) {
+      errors.push(`${slice.id}: verified_before_companion_join`);
+    }
+  }
+
+  for (const join of liveJoins) {
+    const cohort = new Set(parseList(join.fields.join_for));
+    for (const successor of spec.slices.filter((slice) =>
+      !isJoin(slice) && slice.fields.status?.toLowerCase() !== "dropped" && !cohort.has(slice.id)
+    )) {
+      const dependencies = parseList(successor.fields.depends_on);
+      if (dependencies.some((dependency) => cohort.has(dependency)) && !dependencies.includes(join.id)) {
+        errors.push(`${successor.id}: cohort_successor_bypasses_join ${join.id}`);
       }
     }
   }
@@ -382,10 +649,6 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
     }
   }
 
-  const claimDependenciesVerified = (claim: GraphNode): boolean =>
-    parseList(claim.fields.depends_on).every(
-      (dependency) => claimById.get(dependency)?.fields.status?.toLowerCase() === "verified",
-    );
   const claimFrontier = spec.claims
     .filter((claim) => claim.fields.status?.toLowerCase() === "open" && claimDependenciesVerified(claim))
     .map((claim) => claim.id)
@@ -395,101 +658,119 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
     parseList(slice.fields.depends_on).every(
       (dependency) => sliceById.get(dependency)?.fields.status?.toLowerCase() === "verified",
     );
+  const cohortSealed = (slice: GraphNode): boolean =>
+    isJoin(slice) && parseList(slice.fields.join_for).length >= 2 &&
+    parseList(slice.fields.join_for).every(
+      (laneId) => sliceById.get(laneId)?.fields.status?.toLowerCase() === "sealed",
+    );
   const noExternalGates = (slice: GraphNode): boolean => parseList(slice.fields.external_gates).length === 0;
-  const claimsInternallyClosed = (slice: GraphNode): boolean => {
-    const owned = new Set(parseList(slice.fields.satisfies));
-    return [...owned].every((claimId) => {
-      const claim = claimById.get(claimId);
-      const status = claim?.fields.status?.toLowerCase();
-      if (!claim || !["open", "verified", "dropped"].includes(status ?? "")) return false;
-      if (status === "dropped") return true;
-      return parseList(claim.fields.depends_on).every((dependencyId) => {
-        const dependency = claimById.get(dependencyId);
-        const dependencyStatus = dependency?.fields.status?.toLowerCase();
-        return dependencyStatus === "verified" ||
-          (owned.has(dependencyId) && ["open", "verified"].includes(dependencyStatus ?? ""));
-      });
-    });
-  };
-  const hasReachableEntry = (slice: GraphNode): boolean => {
-    const owned = new Set(parseList(slice.fields.satisfies));
-    return [...owned].some((claimId) => {
-      const claim = claimById.get(claimId);
-      return claim?.fields.status?.toLowerCase() === "open" && claimDependenciesVerified(claim);
-    });
-  };
-  const claimsReachable = (slice: GraphNode): boolean => {
-    return claimsInternallyClosed(slice) && hasReachableEntry(slice);
-  };
-  const hasOpenClaim = (slice: GraphNode): boolean => parseList(slice.fields.satisfies).some(
-    (claimId) => claimById.get(claimId)?.fields.status?.toLowerCase() === "open",
-  );
   for (const slice of spec.slices.filter((item) => item.fields.status?.toLowerCase() === "planned")) {
     if (!hasOpenClaim(slice)) errors.push(`${slice.id}: planned_without_open_claim`);
   }
-  const ready = spec.slices.filter(
-    (slice) => slice.fields.status?.toLowerCase() === "planned" && predecessorVerified(slice) && noExternalGates(slice) && claimsReachable(slice) && hasOpenClaim(slice),
-  );
+  const ready = spec.slices.filter((slice) => {
+    if (slice.fields.status?.toLowerCase() !== "planned") return false;
+    const predecessorsReady = isJoin(slice) ? cohortSealed(slice) : predecessorVerified(slice);
+    return predecessorsReady && noExternalGates(slice) && claimsReachable(slice) && hasOpenClaim(slice);
+  });
   const active = spec.slices.filter((slice) => slice.fields.status?.toLowerCase() === "active");
-  const reachableActive = active.filter(
-    (slice) => predecessorVerified(slice) && noExternalGates(slice) && claimsReachable(slice) && hasOpenClaim(slice),
-  );
+  const reachableActive = active.filter((slice) => {
+    const predecessorsReady = isJoin(slice) ? cohortSealed(slice) : predecessorVerified(slice);
+    return predecessorsReady && noExternalGates(slice) && claimsReachable(slice) && hasOpenClaim(slice);
+  });
   const activeFrontier = [...new Set([...reachableActive, ...ready].map((slice) => slice.id))].sort();
 
   for (const slice of active) {
     if (emptyValue(slice.fields.owner) || slice.fields.owner?.toLowerCase() === "none") {
       errors.push(`${slice.id}: active_without_owner`);
     }
-    if (!predecessorVerified(slice)) {
-      errors.push(`${slice.id}: active_with_unverified_predecessor`);
+    const predecessorsReady = isJoin(slice) ? cohortSealed(slice) : predecessorVerified(slice);
+    if (!predecessorsReady) {
+      errors.push(isJoin(slice)
+        ? `${slice.id}: active_before_all_cohort_lanes_sealed`
+        : `${slice.id}: active_with_unverified_predecessor`);
     }
     if (!noExternalGates(slice)) errors.push(`${slice.id}: active_with_external_gate`);
     if (!claimsReachable(slice) || !hasOpenClaim(slice)) errors.push(`${slice.id}: active_with_unreachable_claim`);
   }
 
+  for (const slice of spec.slices.filter((item) => item.fields.status?.toLowerCase() === "sealed")) {
+    if (emptyValue(slice.fields.owner) || slice.fields.owner?.toLowerCase() === "none") {
+      errors.push(`${slice.id}: sealed_without_owner`);
+    }
+    if (!predecessorVerified(slice)) errors.push(`${slice.id}: sealed_with_unverified_predecessor`);
+    if (!noExternalGates(slice)) errors.push(`${slice.id}: sealed_with_external_gate`);
+    if (!claimsInternallyClosed(slice) || !hasOpenClaim(slice)) {
+      errors.push(`${slice.id}: sealed_with_unreachable_claim`);
+    }
+  }
+
   for (const slice of spec.slices.filter((item) => item.fields.status?.toLowerCase() === "blocked")) {
-    if (predecessorVerified(slice) && noExternalGates(slice)) {
+    const predecessorsReady = isJoin(slice) ? cohortSealed(slice) : predecessorVerified(slice);
+    if (predecessorsReady && noExternalGates(slice)) {
       warnings.push(`${slice.id}: blocked_without_visible_blocker`);
     }
   }
 
-  for (let leftIndex = 0; leftIndex < active.length; leftIndex += 1) {
-    for (let rightIndex = leftIndex + 1; rightIndex < active.length; rightIndex += 1) {
-      const left = active[leftIndex];
-      const right = active[rightIndex];
-      const leftOwner = left.fields.owner ?? "";
-      const rightOwner = right.fields.owner ?? "";
-      if (emptyValue(leftOwner) || emptyValue(rightOwner) || leftOwner === rightOwner) continue;
+  const scopeCheckedPairs = new Set<string>();
+  const checkParallelScopes = (lanes: GraphNode[]): void => {
+    for (let leftIndex = 0; leftIndex < lanes.length; leftIndex += 1) {
+      for (let rightIndex = leftIndex + 1; rightIndex < lanes.length; rightIndex += 1) {
+        const left = lanes[leftIndex];
+        const right = lanes[rightIndex];
+        const pair = [left.id, right.id].sort().join("\u0000");
+        if (scopeCheckedPairs.has(pair)) continue;
+        scopeCheckedPairs.add(pair);
+        const leftOwner = left.fields.owner ?? "";
+        const rightOwner = right.fields.owner ?? "";
+        if (emptyValue(leftOwner) || emptyValue(rightOwner)) continue;
+        if (!strictCohortTopology && leftOwner === rightOwner) continue;
 
-      const leftFiles = parseList(left.fields.allowed_scope);
-      const rightFiles = parseList(right.fields.allowed_scope);
-      const leftRuntime = parseList(left.fields.runtime_scope);
-      const rightRuntime = parseList(right.fields.runtime_scope);
-      if (leftFiles.length === 0 || rightFiles.length === 0) {
-        errors.push(`parallel_file_scope_missing: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner})`);
-      }
-      if (leftRuntime.length === 0 || rightRuntime.length === 0) {
-        errors.push(`parallel_runtime_scope_missing: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner})`);
-      }
-      for (const scope of [...leftFiles, ...rightFiles, ...leftRuntime, ...rightRuntime]) {
-        if (!parseScopePattern(scope)) {
-          errors.push(`unsupported_parallel_scope_pattern: ${scope}; use an exact scope or a terminal /**`);
+        const leftFiles = parseList(left.fields.allowed_scope);
+        const rightFiles = parseList(right.fields.allowed_scope);
+        const leftRuntime = parseList(left.fields.runtime_scope);
+        const rightRuntime = parseList(right.fields.runtime_scope);
+        if (leftFiles.length === 0 || rightFiles.length === 0) {
+          errors.push(`parallel_file_scope_missing: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner})`);
         }
-      }
-      for (const leftScope of leftFiles) {
-        for (const rightScope of rightFiles) {
-          if (scopesOverlap(leftScope, rightScope)) {
-            errors.push(`parallel_file_scope_collision: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner}) overlap ${leftScope} <> ${rightScope}`);
+        if (leftRuntime.length === 0 || rightRuntime.length === 0) {
+          errors.push(`parallel_runtime_scope_missing: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner})`);
+        }
+        for (const scope of [...leftFiles, ...rightFiles, ...leftRuntime, ...rightRuntime]) {
+          if (!parseScopePattern(scope)) {
+            errors.push(`unsupported_parallel_scope_pattern: ${scope}; use an exact scope or a terminal /**`);
+          }
+        }
+        for (const leftScope of leftFiles) {
+          for (const rightScope of rightFiles) {
+            if (scopesOverlap(leftScope, rightScope)) {
+              errors.push(`parallel_file_scope_collision: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner}) overlap ${leftScope} <> ${rightScope}`);
+            }
+          }
+        }
+        for (const leftScope of leftRuntime) {
+          for (const rightScope of rightRuntime) {
+            if (scopesOverlap(leftScope, rightScope)) {
+              errors.push(`parallel_runtime_scope_collision: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner}) overlap ${leftScope} <> ${rightScope}`);
+            }
           }
         }
       }
-      for (const leftScope of leftRuntime) {
-        for (const rightScope of rightRuntime) {
-          if (scopesOverlap(leftScope, rightScope)) {
-            errors.push(`parallel_runtime_scope_collision: ${left.id} (${leftOwner}) and ${right.id} (${rightOwner}) overlap ${leftScope} <> ${rightScope}`);
-          }
-        }
-      }
+    }
+  };
+  const pendingCohortLanes = spec.slices.filter((slice) => {
+    if (isJoin(slice) || slice.fields.status?.toLowerCase() === "dropped") return false;
+    const target = reconciliationTarget(slice);
+    return target !== null && sliceById.get(target)?.fields.status?.toLowerCase() !== "verified";
+  });
+  const activeCohortOutsiders = spec.slices.filter(
+    (slice) => !isJoin(slice) && slice.fields.status?.toLowerCase() === "active" && !reconciliationTarget(slice),
+  );
+  checkParallelScopes([...pendingCohortLanes, ...activeCohortOutsiders]);
+  const activeSlices = spec.slices.filter((slice) => slice.fields.status?.toLowerCase() === "active");
+  checkParallelScopes(activeSlices);
+  for (const join of activeSlices.filter(isJoin)) {
+    for (const lane of pendingCohortLanes) {
+      if (reconciliationTarget(lane) !== join.id) checkParallelScopes([join, lane]);
     }
   }
 
@@ -507,7 +788,11 @@ export function checkParsedSpec(spec: ParsedSpec): GraphReport {
     .filter((slice) => {
       const status = slice.fields.status?.toLowerCase();
       return status === "blocked" ||
-        (status === "planned" && (!predecessorVerified(slice) || !noExternalGates(slice) || !claimsInternallyClosed(slice)));
+        (status === "planned" && (
+          !(isJoin(slice) ? cohortSealed(slice) : predecessorVerified(slice)) ||
+          !noExternalGates(slice) ||
+          !claimsInternallyClosed(slice)
+        ));
     })
     .map((slice) => slice.id)
     .sort();
