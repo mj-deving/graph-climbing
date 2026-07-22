@@ -81,6 +81,17 @@ Accepted findings:
 
 Scope disposition: both findings affect the same goal/ledger owner boundary and require no new runtime, lock service, or product contract. The second correction cycle therefore remained in scope.
 
+## Autoreview Round 003
+
+Snapshot: commit `3a6f720`.
+
+Accepted findings:
+
+- A central owner could still publish a replacement from a stale quiescence observation after an old-epoch worker had claimed and passed its checks. A conditionally atomic epoch/lease transition would solve this but would introduce the custom coordination layer the simplicity gate rejects. Correction: the N-worker run epoch is static for the run. Replacement is a coordinated stop-the-world regraph after every epoch worker is durably paused or terminated and all lanes, seals, and joins are reconciled or withdrawn. The identical worker goals resume afterward.
+- Workers checked only epoch identity, not the certified release envelope. Correction: every candidate binds a canonical envelope hash; workers compare both epoch and hash immediately before and after claim and mutate nothing on mismatch.
+
+Design boundary: N-way autonomous progress is supported within one admitted execution graph. Live graph remodeling is not lock-free; it is an explicit rare barrier. This preserves the requested same-goal worker model without claiming an unavailable multi-record transaction.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.

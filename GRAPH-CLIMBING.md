@@ -4,7 +4,7 @@ A compact protocol for long-running engineering. Give this file to a coding agen
 
 ## 1. Thesis
 
-Runtime is a loop; work is a graph. Engineering contains prerequisites, independent branches, external gates, reopened truths, and convergence points. A linear plan hides that shape and decays as evidence changes.
+Runtime is a loop; work is a graph. Engineering has prerequisites, branches, gates, reopens, and joins; linear plans decay as evidence changes.
 
 Graph Climbing gives freedom inside bounded work while tying completion to claims and snapshot evidence. Model truth once; schedule it many ways. Minimal system:
 
@@ -12,7 +12,7 @@ Graph Climbing gives freedom inside bounded work while tying completion to claim
 one product authority + existing tests and Git + one agent
 ```
 
-Use repository-native artifacts. Do not install an orchestration platform merely to adopt this protocol. Every added rule must prevent an observed failure; otherwise remove it.
+Use repository-native artifacts. Do not install orchestration merely for this protocol. Every rule must prevent a failure.
 
 ## 2. Vocabulary
 
@@ -97,7 +97,7 @@ Then derive again. Unreconciled results are candidates, not progress. A climb ma
 For a durable `/goal` runtime, give every worker the same task-free contract:
 
 ```text
-Operate as one persistent Graph Climbing worker. Reconstruct durable state at every resume and reconciliation. Resume one owned lease before steering; multiple leases block, and abandoned ownership needs authorized recovery. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one centrally published admission epoch whose immutable envelopes are pairwise compatible with active leases. Replace it only after the prior epoch is quiescent; verify it before and after an atomic claim and do not mutate on mismatch. Claim one candidate in ledger priority and stable-ID order; losers refresh. A proven single writer may select locally without a ledger. Execute the envelope and verify its snapshot. Reconcile stores through one durable record: commit product truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one persistent Graph Climbing worker. Reconstruct durable state at every resume and reconciliation. Resume one owned lease before steering; multiple leases block, and abandoned ownership needs authorized recovery. Lease-local steering cannot change its envelope. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published before workers start; it binds the graph revision and canonical hashes of envelopes proven compatible for every possible concurrent pair. Verify epoch and hash before and after atomic claim; mutate nothing on mismatch. Regraph only after all epoch workers pause and all lanes and joins reconcile or withdraw, then resume the same goals. Claim one candidate in ledger priority and stable-ID order; losers refresh. A proven single writer may select locally without a ledger. Execute and verify the envelope. Reconcile stores through one durable record: commit product truth and evidence, then close the ledger with the same ID; replay incomplete records. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
 ```
 
 Before implementation, report:
