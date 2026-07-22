@@ -69,6 +69,8 @@ Add an Execution Graph and one operational ledger only when work must survive lo
 - [`case-studies/dacs-agent-template.md`](case-studies/dacs-agent-template.md): interim Graph Climbing field report from the active DACS Forge build.
 - [`case-studies/autoreview-semantic-hardening.md`](case-studies/autoreview-semantic-hardening.md): short reusable account of the inner semantic-hardening loop.
 - [`conformance/dogfood/2026-07-21-v2.md`](conformance/dogfood/2026-07-21-v2.md): source-blind V2 scenario and CLI evidence.
+- [`conformance/dogfood/2026-07-22-topology-design.md`](conformance/dogfood/2026-07-22-topology-design.md): pre-implementation topology contract plus genuine Fable finding disposition.
+- [`conformance/fixtures/topology`](conformance/fixtures/topology): executable N=2/3/4 companion-join and failure fixtures.
 - [`visuals`](visuals/README.md): deterministic SVG diagrams, 2400×1350 PNG exports, alt text, semantic Mermaid companions, and the editorial hero.
 
 ## Visual system
@@ -84,7 +86,7 @@ bun run graph-check examples/notes-cli/SPEC.md
 bun test
 ```
 
-`graph-check` verifies mechanical consistency: IDs, dependency references and cycles, probes, evidence requirements, optional vertical-to-claim mappings, current-slice reachability, parallel scope isolation, and derived frontiers. Its report includes `claimFrontier`, `frontierKind`, and the compatible `activeFrontier`. It cannot certify product correctness or semantic claim quality. Named product probes remain the authority for those claims.
+`graph-check` verifies mechanical consistency: IDs, dependency references and cycles, probes, evidence requirements, optional vertical-to-claim mappings, current-slice reachability, parallel scope isolation, opt-in `cohort-v1` sealed-lane and N-way companion-join invariants, and derived frontiers. Its report includes `claimFrontier`, `frontierKind`, and the compatible `activeFrontier`. It cannot certify product correctness or semantic claim quality. Named product probes remain the authority for those claims.
 
 ## Spec as eval surface
 

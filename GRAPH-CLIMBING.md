@@ -6,7 +6,7 @@ A compact protocol for long-running agentic engineering. Paste this file into a 
 
 The runtime is a loop; the work is a graph. Real engineering contains prerequisites, independent branches, external gates, reopened truths, and convergence points. A linear plan hides that shape and decays as evidence changes.
 
-Graph Climbing gives an agent wide freedom inside one bounded unit of product work while keeping completion tied to durable claims and snapshot-bound evidence. The minimal system is:
+Graph Climbing gives an agent freedom inside bounded product work while keeping completion tied to durable claims and snapshot-bound evidence. Model truth once; schedule it many ways. The minimal system is:
 
 ```text
 one product authority + existing tests and Git + one agent
@@ -16,12 +16,12 @@ Use repository-native artifacts. Do not install an orchestration platform merely
 
 ## 2. Vocabulary
 
-- **claim graph**: the durable product authority. Its nodes are atomic, falsifiable statements of product truth; its edges are claim dependencies.
-- **claim frontier**: open claims whose dependencies are verified and which are not blocked or unknown.
-- **active frontier**: the actual executable selection set. Without an Execution Graph it equals the claim frontier; with one it contains executable verticals.
-- **vertical**: one bounded implementation unit over reachable claims. It is a local execution choice unless coordination makes it worth persisting.
+- **claim graph**: durable product authority: atomic falsifiable claims plus dependencies.
+- **claim frontier**: open claims with verified dependencies and no blocker or unknown.
+- **active frontier**: executable selection set: claims without an Execution Graph, verticals with one.
+- **vertical**: bounded implementation unit over reachable claims, persisted only when coordination warrants it.
 - **Execution Graph / ledger**: optional operational state for long runs, gates, ownership, debt, or multiple workers. It does not define product truth.
-- **evidence**: an observation tied to an exact code, artifact, dependency, or runtime snapshot.
+- **evidence**: observation tied to an exact code, artifact, dependency, or runtime snapshot.
 - **climb**: one `derive → select → build → verify → reconcile` iteration.
 - **Graph Climbing**: the complete protocol across repeated climbs.
 - **reconcile**: write claim status, evidence, decisions, and operational state back to their owning durable surfaces.
@@ -42,7 +42,7 @@ Keep one authority per concern:
 - tests, reviews, Git, runtime observations, and releases supply evidence;
 - the climber selects the next vertical but owns no hidden durable truth.
 
-Generated graphs and dashboards are views. They must be reproducible from the authorities, never maintained as competing databases. Brownfield adoption starts by finding existing authorities; do not create a second product spec because its format is unfamiliar.
+Generated graphs and dashboards are reproducible views, never competing databases. Brownfield adoption finds existing authorities rather than creating a familiar-looking second spec.
 
 ## 4. Claim contract
 
@@ -57,11 +57,11 @@ probe: bun test test/public-access.test.ts
 evidence: none
 ```
 
-A claim is atomic when one probe yields one product decision. Split it when one part can pass while another independently fails, especially across UI, API, persistence, security, or release boundaries. Preserve split parents and dropped IDs as history; never reassign an ID.
+A claim is atomic when one probe yields one product decision. Split when one part can pass while another fails independently. Preserve split parents and dropped IDs; never reassign an ID.
 
-Use `verified`, `open`, `blocked`, `unknown`, and `dropped` distinctly. Unknown means the evidence or product decision is insufficient; it is not zero progress. A verified sibling may remain closed while another sibling is blocked. Include at least one `Anti:` claim for a grounded critical failure.
+Use `verified`, `open`, `blocked`, `unknown`, and `dropped` distinctly. Unknown means insufficient evidence or decision. Include at least one grounded `Anti:` claim.
 
-Progress is not monotonic. New evidence may reopen a verified claim. Review alone is not enough: only a finding that is accepted and independently verified against the relevant snapshot may reopen or add claims. Retain a reason for rebutted or deferred findings.
+Progress is non-monotonic. Only a finding accepted and independently verified against the relevant snapshot may reopen or add claims. Record reasons for rebuttal or deferral.
 
 ## 5. Frontier and verticals
 
@@ -78,9 +78,9 @@ frontier_kind = claim
 active_frontier = claim_frontier
 ```
 
-Choose a small, high-value vertical over that set. Prefer work that unlocks downstream claims, reduces product or safety uncertainty, fits one evidence-bearing change, and has bounded ownership. A vertical may include several dependent claims when at least one entry claim is reachable and every unfinished internal dependency is contained in the same vertical. External dependencies must already be verified.
+Choose a small, high-value vertical with bounded ownership. It may include dependent claims when one entry claim is reachable, every unfinished internal dependency is contained, and external dependencies are verified.
 
-With an Execution Graph, derive executable verticals from claim reachability plus vertical dependencies, gates, ownership, and scope:
+With an Execution Graph, derive executable verticals from claim reachability plus dependencies, gates, ownership, and scope:
 
 ```text
 frontier_kind = vertical
@@ -88,6 +88,8 @@ active_frontier = executable verticals
 ```
 
 A blocked claim or release gate must not suppress unrelated reachable claims. Do not keep following yesterday's plan after evidence changes the graph.
+
+An edge is real only when downstream work consumes upstream data, an artifact, verified state, an authority decision, an external gate, or probe-required evidence. Written order alone is not a dependency. Reading a file another lane changes also creates an edge even when write scopes differ.
 
 ## 6. One climb
 
@@ -99,7 +101,7 @@ One climb is deliberately local:
 4. **Verify** with claim-matched tests, runtime observations, review, and required release gates.
 5. **Reconcile** status, snapshot evidence, decisions, invalidations, ownership, and debt into their owning surfaces.
 
-Then derive again. A build or test result that has not been reconciled is a completion candidate, not official progress. A climb may close one claim, reopen another, expose an unknown, or leave the verified count lower than before; honest topology beats checkbox growth.
+Then derive again. Unreconciled results are completion candidates, not official progress. A climb may close, reopen, or expose unknown claims; honest topology beats checkbox growth.
 
 Before implementation, report:
 
@@ -117,7 +119,7 @@ unknowns:
 
 ## 7. Evidence and reconciliation
 
-Evidence must name what was observed and where: commit or diff, focused and full tests, runtime response, rendered UI, upstream pin, review finding and disposition, or release artifact. Match modality to claim. A source inspection cannot prove runtime behavior; a local test cannot grant release authority.
+Evidence names what and where: snapshot, tests, runtime response, rendered UI, upstream pin, review disposition, or release artifact. Match modality to claim; source inspection cannot prove runtime behavior.
 
 Separate local verification from certification:
 
@@ -126,13 +128,25 @@ verified_local     named claims pass at the exact local snapshot
 release_certified  integration, provenance, and human gates also pass
 ```
 
-When work crosses a repository or artifact boundary, declare the input authority, supported claim IDs, output snapshot, reconciliation destination, and remaining provenance gaps. Workers and reviewers return evidence candidates. The integrator verifies and reconciles them; they do not self-certify completion.
+Across repository or artifact boundaries, declare the input authority, claim IDs, output snapshot, reconciliation destination, and provenance gaps. Workers and reviewers return evidence candidates; they do not self-certify completion.
 
 Reconciliation updates only owning surfaces: product truth in the claim graph, operational state in the ledger, observations in the evidence record, and temporary hints in current context. Stable history remains inspectable.
 
+`completion_evidence` preserves a cohort's verified snapshot; later verified findings may reopen individual claims without rewriting historical lane completion.
+
 ## 8. Scaling and anti-patterns
 
-Do not create a ledger for a short serial adoption. Add an Execution Graph only when state must survive long runs, external gates, or multiple writers. Parallel workers require separate reachable verticals, explicit owners, disjoint file and runtime scopes, no unfinished dependency between them, and one central reconciliation owner. Stay serial when isolation and merge cost approach the value of parallel execution.
+Do not create a ledger for short serial work. Add an Execution Graph only for durable runs, gates, or multiple writers. Choose topology without changing the claim graph:
+
+- **serial** for causal coupling or shared authority;
+- **pipeline** when each item can advance independently;
+- **fan-out/fan-in** for isolated lanes converging on one snapshot;
+- **router** when validated output selects the next branch;
+- **verifier fan-out** for independent read-only falsification of one snapshot.
+
+Use a barrier only for a cross-set operation, shared release, or central reconciliation. Deterministic flattening, filtering, or deduplication is code, not an agent job.
+
+Every released N-way cohort needs explicit owners, disjoint file and runtime scopes, no unfinished dependency between lanes, and one pre-created companion reconciliation vertical. New strict Work Graphs declare `topology_contract: cohort-v1`; each lane names its companion with `reconcile_via`, and the companion names the exact set with `join_for`. A lane may become `sealed` after its own probe and Autoreview loop, but sealed work is only an evidence candidate: it unlocks no ordinary successor. When all lanes seal, the companion runs combined probes and review. It then atomically reconciles lane, join, claim, evidence, decision, and ledger state. A rejected candidate returns its lane to active work; unaffected siblings may stay sealed. Withdrawal drops the old join and creates a replacement. Stay serial when coordination cost erases the gain.
 
 Common failures:
 
@@ -141,6 +155,9 @@ Common failures:
 - snapshot-free evidence that cannot be replayed;
 - blocked external work freezing independent local work;
 - parallel writers sharing files or runtime state;
+- dependency edges that carry only written order;
+- sealed work treated as verified before its join;
+- cohorts released without a durable convergence point;
 - review infrastructure recursively hardening itself;
 - automatic continuation waking without new frontier work;
 - commit-per-climb, custom locking, or global ID machinery without an observed need.
