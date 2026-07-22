@@ -1,6 +1,6 @@
 # Graph Climbing
 
-Protocol for long-running engineering. Kit: [mj-deving/graph-climbing](https://github.com/mj-deving/graph-climbing).
+Engineering protocol: [mj-deving/graph-climbing](https://github.com/mj-deving/graph-climbing).
 
 ## 1. Thesis
 
@@ -12,7 +12,7 @@ Graph Climbing ties work to claims and snapshot evidence. Model once; schedule m
 one product authority + existing tests and Git + one agent
 ```
 
-Use native artifacts. Do not install orchestration merely for this protocol. Rules must prevent failures.
+Use native artifacts. Add orchestration only when needed. Rules prevent failures.
 
 ## 2. Vocabulary
 
@@ -26,7 +26,7 @@ Use native artifacts. Do not install orchestration merely for this protocol. Rul
 - **Graph Climbing**: the complete protocol across repeated climbs.
 - **reconcile**: write claim status, evidence, decisions, and operational state back to their owning durable surfaces.
 
-An ISA, PRD, or repository-native spec can implement the claim graph. Beads, GitHub Issues, or another tracker can implement the optional ledger. Goal runtimes and supervisors can support liveness; none is required.
+ISA, PRD, or native spec can implement the claim graph. Beads, GitHub Issues, or another tracker can implement the optional ledger. Goal runtimes may support liveness; none is required.
 
 ## 3. Kernel and authority
 
@@ -97,7 +97,7 @@ Then derive again. Unreconciled results are candidates, not progress. A climb ma
 For a durable `/goal` runtime, give every worker the same task-free contract:
 
 ```text
-Operate as one Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Before Ready, the release owner pre-binds every ledger lease to one vertical, envelope hash, exclusive workspace, and epoch when applicable. Atomic claim binds only the unique runtime incarnation as actor/assignee; re-read every binding and assume no metadata CAS. Resume exact bindings; handoff proves the old incarnation stopped and exclusively acquires its original workspace or durably transfers and dispositions all Git, filesystem, runtime, and evidence state; otherwise recover. Steering closes only after its effect, disposition, or replacement barrier is durable. Reconciliation owner writes truth in its authority workspace. Recovery is forbidden during commit-to-close; otherwise it stops scope writers, resolves records, tombstones the ID, and creates another. A ledgerless single writer reconstructs from truth, Git, and evidence. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph revision and envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Verify the applicable epoch and hash before and after claim; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile through a record binding lease ID, hash, and epoch: only an active current lease may commit idempotently, then close that ID. Tombstoned records are superseded. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Before Ready, the release owner pre-binds every ledger lease to one vertical, envelope hash, exclusive workspace, and epoch when applicable. Atomic claim binds only the unique runtime incarnation as actor/assignee; re-read every binding and assume no metadata CAS. Resume exact bindings; handoff proves the old incarnation stopped and exclusively acquires its original workspace. Otherwise recovery freezes claims, stops scope writers, resolves and durably imports or dispositions all Git, filesystem, runtime, and evidence state, tombstones the ID, and creates another pre-bound lease. Steering closes only after its effect, disposition, or replacement barrier is durable. Reconciliation owner writes truth in its authority workspace. Recovery is forbidden during commit-to-close. A ledgerless single writer reconstructs from truth, Git, and evidence. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph revision and envelope hashes proven compatible for every pair whose reservations can overlap from claim through direct reconciliation or cohort join. Verify the applicable epoch and hash before and after claim; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile through a snapshot record; when ledger-backed it binds lease ID, hash, and applicable epoch, permits only the active current lease to commit idempotently, then closes that ID. Ledgerless reconciliation commits product truth and evidence from the record without a ledger. Tombstoned records are superseded. A cohort lane verifies no claim before its join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
 ```
 
 Before implementation, report:
@@ -159,12 +159,12 @@ DACS evidence: [interim field report](https://github.com/mj-deving/graph-climbin
 
 Start now:
 
-1. Inspect instructions, authorities, Git, tests, evidence, and external pins.
-2. Name authority map. Adopt an adequate product authority; create a repository-native spec only when none exists.
-3. Preserve intent, boundaries, stable atomic claims, dependencies, probes, status, decisions, and evidence. Keep unresolved semantics `unknown` and outside the frontier.
+1. Inspect instructions, authorities, Git, tests, evidence, pins.
+2. Name authorities. Adopt an adequate product authority; create a native spec only when none exists.
+3. Preserve intent, boundaries, atomic claims, dependencies, probes, status, decisions, and evidence. Keep unresolved semantics `unknown` outside the frontier.
 4. Derive and report `claim_frontier`, `frontier_kind`, and `active_frontier`.
-5. Select one bounded vertical and its first falsifying probe. Add no ledger unless the scaling conditions already exist.
-6. Execute one climb, reconcile, derive again, and continue while reachable work remains.
+5. Select a bounded vertical and first falsifying probe. Add no ledger unless scaling conditions exist.
+6. Climb, reconcile, derive again, and continue while reachable work remains.
 
 Graph Climbing is failing when a fresh operator cannot reconstruct the frontier, claims close without matching evidence, review findings change truth without verification, spec and ledger compete, coordination costs more than parallel work returns, or a strong agent must remember state absent from durable artifacts. Track closure integrity, reopen rate, authority divergence, frontier derivation time, review yield, and governance overhead. Change only when justified.
 

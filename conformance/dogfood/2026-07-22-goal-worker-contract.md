@@ -248,6 +248,19 @@ Accepted findings:
 
 Correction: the full handoff and recovery fences are restored. Epoch binding and verification are explicitly conditional and therefore required only for `N-worker-epoch`.
 
+## Final-bundle Codex Round 008
+
+Snapshot: commit `b3d4def`; full bundle from `540a308`.
+
+Accepted findings:
+
+- Gist recovery stopped known writers but did not freeze new claims.
+- The full worker contract made lease IDs and ledger close unconditional during `serial-no-ledger` reconciliation.
+- Full-contract claim selection did not qualify epoch verification as N-worker-only.
+- Workspace transfer during handoff conflicted with the lease's immutable workspace binding.
+
+Correction: recovery now freezes claims; ledgerless reconciliation uses product truth, Git, evidence, and its snapshot record without a lease; only an applicable epoch is verified; and normal handoff exclusively acquires the original workspace while any transfer routes through stopped-writer recovery and a new pre-bound lease.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
