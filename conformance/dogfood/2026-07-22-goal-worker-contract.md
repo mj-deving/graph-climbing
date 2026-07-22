@@ -273,6 +273,16 @@ Accepted findings and live disposition:
 
 Correction: stopped-writer recovery now freezes claims and first replays or dispositions incomplete records while their exact leases remain active. Successful replay closes without replacement; rotation occurs only if work remains. Handoff retains the reconciliation fence. The Beads recipe persists both links in `close_reason` on the exact close command.
 
+## Final-bundle Codex Round 010
+
+Snapshot: commit `ecf2361`; full bundle from `540a308`.
+
+Accepted finding:
+
+- Recovery initiation had no atomic owner. Two incarnations could inspect one abandoned lease, tombstone it, and create distinct replacement IDs that normal per-lease CAS could not deduplicate.
+
+Correction: every ledger-backed lease now names one pre-created authority-scope recovery barrier. Recovery requires its atomic claim; losers stop. Normal workers verify the barrier before and after candidate claim. The exclusive recovery owner freezes claims, stops writers, replays before rotation, creates a successor barrier with any replacement, and closes the old barrier last.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
