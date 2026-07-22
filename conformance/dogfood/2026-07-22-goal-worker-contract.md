@@ -283,6 +283,17 @@ Accepted finding:
 
 Correction: every ledger-backed lease now names one pre-created authority-scope recovery barrier. Recovery requires its atomic claim; losers stop. Normal workers verify the barrier before and after candidate claim. The exclusive recovery owner freezes claims, stops writers, replays before rotation, creates a successor barrier with any replacement, and closes the old barrier last.
 
+## Final-bundle Codex Round 011
+
+Snapshot: commit `087bc00`; full bundle from `540a308`.
+
+Accepted findings:
+
+- Owned-lease resume did not verify that its recovery barrier remained inactive.
+- A crashed recovery-barrier owner had no safe takeover path; automatic timeout-steal would confuse failure with delay.
+
+Correction: resume now requires an inactive barrier and an active barrier prevents mutation. Recovery barriers are explicitly non-stealable and fail-stop. Owner loss keeps the scope frozen until an external principal proves the owner stopped and performs a supported authoritative reset or full epoch replacement; time alone grants no takeover authority.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
