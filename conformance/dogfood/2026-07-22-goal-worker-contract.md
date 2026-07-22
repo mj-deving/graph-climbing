@@ -207,6 +207,18 @@ Accepted findings:
 
 Correction: all compact surfaces now retain both previously accepted invariants.
 
+## Final-bundle Codex Round 004
+
+Snapshot: commit `38684fc`.
+
+Accepted findings:
+
+- Gist compression changed `durable truth` to `truth` at completion.
+- Conformance compression omitted exclusive acquisition or durable disposition of transferred workspace state.
+- Skill compression omitted mandatory recovery after missing or uncertain handoff state.
+
+Correction: all three exact safety clauses are restored and frozen against further compression.
+
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
