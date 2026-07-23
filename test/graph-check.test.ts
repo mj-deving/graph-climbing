@@ -95,18 +95,21 @@ test("goal distribution matches the skill asset", async () => {
   expect(starter).toBe(asset);
 });
 
-test("worker runtime stays small, task-free, and below the native goal limit", async () => {
+test("worker runtime stays task-free and below the native goal limit", async () => {
   const goal = await Bun.file(new URL("../starter/GOAL.md", import.meta.url)).text();
   const runtime = goal.match(/```text\n([\s\S]*?)\n```/)?.[1];
   const protocol = await Bun.file(new URL("../GRAPH-CLIMBING.md", import.meta.url)).text();
   expect(runtime).toBeDefined();
-  expect(runtime!.length).toBeLessThanOrEqual(1_100);
+  expect(runtime!.length).toBeLessThan(4_000);
   expect(protocol).toContain(`\`\`\`text\n${runtime}\n\`\`\``);
   expect(runtime).toContain("vertical or companion join");
   expect(runtime).toContain("any applicable epoch");
   expect(runtime).toContain("unique runtime incarnation");
-  expect(runtime).toContain("re-read exact ownership and bindings");
+  expect(runtime).toContain("re-read exact ownership, bindings, and barriers");
+  expect(runtime).toContain("inactive barriers");
+  expect(runtime).toContain("A failed claim re-derives only in a declared multi-worker run");
   expect(runtime).toContain("locally select one bounded frontier item as its lease");
+  expect(runtime).toContain("Apply steering only at a safe boundary");
   expect(runtime).not.toMatch(/\bDACS-standard-|\b[CS]-\d+/);
   expect(runtime).not.toContain("bd update");
   expect(runtime).not.toContain("recovery barrier ID");
