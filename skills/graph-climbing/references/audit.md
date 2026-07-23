@@ -5,7 +5,7 @@ Audit read-only. Stop when each reported divergence has an exact source anchor.
 1. Read the product authority completely.
 2. Read the operational ledger only where it affects active work, dependencies, ownership, or gates.
 3. Inspect Git state, named tests, evidence artifacts, and relevant external pins.
-4. Run `bun <skill-dir>/scripts/graph-check.ts <spec-path> --json` when the reference format is used.
+4. Run `bun <skill-dir>/scripts/graph-check.ts <spec-path> --json` only for the strict reference format. For a repository-native ISA, use its explicit native checker when present; otherwise audit it semantically without creating a second claim graph.
 5. Derive the claim frontier first. Report `frontier_kind: claim` without a Work Graph and `frontier_kind: vertical` with one; then derive `active`, `ready`, `blocked`, `verified`, and `unknown` work from the owning sources.
 6. Check semantic quality the script cannot decide:
    - intent and boundary coverage;

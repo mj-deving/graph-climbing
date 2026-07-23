@@ -11,7 +11,7 @@ Operate on the repository's durable product authority, optional execution ledger
 
 - Bootstrap or adopt a work graph: read `references/bootstrap.md`.
 - Persist the repository-native authority/ledger adapter during adoption: use `assets/AGENT-ROUTER.md`; audit mode never writes it.
-- Audit correctness, frontier, blockers, or parallelism: read `references/audit.md`, then run `scripts/graph-check.ts` when the spec follows the reference format.
+- Audit correctness, frontier, blockers, or parallelism: read `references/audit.md`, then run `scripts/graph-check.ts` only when the authority uses the strict reference format; otherwise use the repository's explicit native checker, if any, and audit the authority semantically.
 - Reconcile a completed slice, finding, steer, or drift event: read `references/reconcile.md`.
 - Install one task-free contract into a durable goal runtime or N workers: use only the fenced runtime text in `assets/GOAL.md`; keep concrete work and control-plane mechanics in the graph, ledger, and release process.
 

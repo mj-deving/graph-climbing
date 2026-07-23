@@ -96,7 +96,7 @@ bun test
 
 `graph-check` verifies mechanical consistency: IDs, dependency references and cycles, probes, evidence requirements, optional vertical-to-claim mappings, current-slice reachability, parallel scope isolation, opt-in `cohort-v1` sealed-lane and N-way companion-join invariants, and derived frontiers. Its report includes `claimFrontier`, `frontierKind`, and the compatible `activeFrontier`. It cannot certify product correctness or semantic claim quality. Named product probes remain the authority for those claims.
 
-The bundled checker parses the reference `SPEC.md` shape. A repository-native ISA remains the product authority and uses its bound native checker or adapter; do not rewrite or duplicate product claims merely to satisfy `graph-check`. Any generated checker projection is disposable derived data, never a second claim or status authority.
+The bundled checker parses only the strict reference `SPEC.md` shape. A repository-native ISA remains the product authority and workers read it semantically; a generic prose-to-graph parser is not a prerequisite. Use a repository-native checker or adapter only when the repository explicitly provides one over machine-readable fields. Any projection remains disposable derived data, while execution ownership and scopes come from the ledger-bound envelope. Never rewrite or duplicate product claims merely to satisfy `graph-check`.
 
 ## Spec as eval surface
 
