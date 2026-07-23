@@ -101,7 +101,7 @@ For a durable `/goal` runtime, give every worker the same small task-free contra
 ```text
 Operate as one Graph Climbing worker.
 
-At start, resume, or reconciliation, reconstruct instructions, product authority, ledger, Git, and evidence; derive the frontier with graph-check. Chat is never durable state.
+At start, resume, or reconciliation, reconstruct instructions, product authority, ledger, Git, and evidence; derive the frontier from product authority with its repository-bound checker or adapter. Use graph-check only for its supported reference format. Chat is never durable state.
 
 With a ledger, first resume any lease already owned by this runtime incarnation after validating its exact ownership, envelope binding, any applicable epoch, and inactive barriers. Otherwise validate one ready candidate (vertical or companion join) against the same controls; atomically claim it with a unique runtime incarnation, then re-read exact ownership, bindings, and barriers. A failed claim re-derives only in a declared multi-worker run; otherwise stop. Without a ledger, proceed only as a proven single writer and locally select one bounded frontier item with a complete envelope as its lease. Never hold two mutation leases or work outside the envelope.
 

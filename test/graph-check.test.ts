@@ -116,6 +116,8 @@ test("worker runtime stays task-free and below the native goal limit", async () 
   expect(runtime).toBeDefined();
   expect(runtime!.length).toBeLessThan(4_000);
   expect(protocol).toContain(`\`\`\`text\n${runtime}\n\`\`\``);
+  expect(runtime).toContain("derive the frontier from product authority with its repository-bound checker or adapter");
+  expect(runtime).toContain("Use graph-check only for its supported reference format");
   expect(runtime).toContain("vertical or companion join");
   expect(runtime).toContain("first resume any lease already owned by this runtime incarnation");
   expect(runtime).toContain("any applicable epoch");
