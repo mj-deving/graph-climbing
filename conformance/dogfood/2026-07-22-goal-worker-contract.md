@@ -314,7 +314,7 @@ The first implementation put worker policy, release-owner duties, recovery, epoc
 
 The corrected design separates responsibilities:
 
-- the identical worker runtime is 1,100 characters or less and retains only reconstruction, one-lease execution, verification, reconciliation, completion, and fail-closed stop boundaries;
+- the identical worker runtime is 1,100 characters or less and retains reconstruction, pre/post-claim candidate validation, one-lease execution, verification, reconciliation, completion, and fail-closed stop boundaries;
 - the release process makes a work item—vertical or companion join—Ready only after its complete immutable envelope and compatibility checks exist;
 - the ledger provides atomic ownership and exact close state;
 - handoff, recovery, replay, and epoch replacement remain explicit operator procedures behind barriers;
