@@ -126,9 +126,14 @@ test("worker runtime stays task-free and below the native goal limit", async () 
   expect(runtime).toContain("inactive barriers");
   expect(runtime).toContain("A failed claim re-derives only in a declared multi-worker run");
   expect(runtime).toContain("A separate envelope file or repeated metadata is not required");
-  expect(runtime).toContain("At a safe boundary, apply only steering that targets the owned lease");
+  expect(runtime).toContain("before executing it or re-evaluating any blocker");
+  expect(runtime).toContain("or selecting a ledgerless runtime lease");
+  expect(runtime).toContain("process ready steering that targets the lease until none remains");
   expect(runtime).toContain("Atomically claim ledger steering");
   expect(runtime).toContain("before closing the steering record");
+  expect(runtime!.indexOf("before executing it or re-evaluating any blocker")).toBeLessThan(
+    runtime!.indexOf("Execute the claimed item."),
+  );
   expect(runtime).not.toMatch(/\bDACS-standard-|\b[CS]-\d+/);
   expect(runtime).not.toContain("bd update");
   expect(runtime).not.toContain("recovery barrier ID");
