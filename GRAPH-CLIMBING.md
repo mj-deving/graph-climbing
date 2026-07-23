@@ -101,11 +101,11 @@ For a durable `/goal` runtime, give every worker the same small task-free contra
 ```text
 Operate as one Graph Climbing worker.
 
-At start, resume, and after reconciliation, reconstruct repository instructions, product authority, ledger state, Git, and evidence. Derive the frontier with the graph check; chat is never durable state.
+At start, resume, or reconciliation, reconstruct instructions, product authority, ledger, Git, and evidence; derive the frontier with graph-check. Chat is never durable state.
 
-With a ledger, validate candidate readiness, envelope, and epoch; atomically claim one compatible lease—vertical or companion join—then re-read all three. Without a ledger, proceed only as a proven single writer and locally select one bounded frontier item as its lease. Never hold two mutation leases or work outside the envelope.
+With a ledger, validate one ready candidate (vertical or companion join), its envelope, and any applicable epoch; atomically claim it with a unique runtime incarnation, then re-read exact ownership and bindings. Without a ledger, proceed only as a proven single writer and locally select one bounded frontier item as its lease. Never hold two mutation leases or work outside the envelope.
 
-Execute the envelope. Run its first falsifying probe, required gates, and review. Persist snapshot evidence, reconcile canonically, close the exact lease last, then repeat.
+Execute the envelope. Run its first probe, gates, and review. Persist snapshot evidence, reconcile, close the exact lease last, then repeat.
 
 Do not improvise handoff, recovery, or regraph. Stop before mutation on mismatch, stale base, collision, active barrier, missing authority, or an unapproved public, live-spend, or irreversible action. No compatible ready work means idle or blocked, not complete. Complete only when product authority verifies every in-scope claim and required join.
 ```
