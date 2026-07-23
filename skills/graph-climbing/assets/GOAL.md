@@ -16,7 +16,7 @@ Do not improvise handoff, recovery, or regraph. Stop before mutation on mismatch
 
 ## System contract
 
-The goal is intentionally small. Before a ledger-backed vertical becomes ready, the repository's release process must durably supply and validate its exact ID, base, workspace, scopes, falsifying probe, gates, evidence destination, immutable envelope binding, reconciliation route, and any applicable cohort or epoch membership.
+The goal is intentionally small. Before a ledger-backed work item becomes ready, the repository's release process must durably supply and validate its kind, exact ID, base, workspace, scopes, authority, falsifying probe, gates, evidence destination, immutable envelope binding, reconciliation route, and any applicable cohort or epoch membership.
 
 Atomic claim and post-claim read-back enforce ownership. The graph checker enforces structural readiness and scope compatibility. Recovery, handoff, epoch replacement, and cross-authority replay are operator procedures behind explicit barriers; ordinary workers stop rather than simulate them from prose. Product truth remains in the product authority, operational state in one ledger, and observations in snapshot-bound evidence.
 
