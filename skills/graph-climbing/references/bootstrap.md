@@ -4,7 +4,7 @@ Use for greenfield scaffolding and brownfield adoption.
 
 1. Read repository instructions, existing specs, tests, recent Git history, and the active tracker if present.
 2. Name the current product authority, ledger, and evidence sources. Do not create an artifact for a concern that already has an adequate owner.
-3. Persist those exact mappings in repository-native agent instructions using `../assets/AGENT-ROUTER.md`: merge into existing `AGENTS.md`, or create a concise root file; touch `CLAUDE.md` only when used or requested. Preserve stricter rules and keep mutable task state out. Audit mode makes no writes.
+3. Persist those exact mappings in repository-native agent instructions using `../assets/AGENT-ROUTER.md`: merge into the repository-root `AGENTS.md`, or create that root file when absent; preserve nested instruction files as scoped overlays. Touch `CLAUDE.md` only when used or requested. Preserve stricter rules and keep mutable task state out. Audit mode makes no writes.
 4. Preserve the human's stated intent. Distill a concise desired state rather than optimizing for the literal wording.
 5. Record explicit out-of-scope and immovable constraints. Do not promote an inferred product decision into a boundary. Derive at least one testable `Anti:` criterion from grounded critical boundaries.
 6. Draft stable criteria as desired states. Give independently failing observable behaviors separate criteria even when one broad test could inspect both. Apply the splitting test until each leaf has one binary falsifying probe; the mechanical checker does not prove semantic atomicity.

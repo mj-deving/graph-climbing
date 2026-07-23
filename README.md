@@ -37,7 +37,7 @@ Do not install an orchestration platform.
 Report the authority map, claim frontier, frontier kind, active frontier, selected vertical, and first probe before building.
 ```
 
-An adoption/bootstrap request also persists a concise repository adapter: it updates or creates `AGENTS.md`, and updates `CLAUDE.md` only when that surface is in use. The adapter binds `product_authority`, `operational_ledger`, evidence, resume commands, and stop rules to exact local artifacts while keeping live task state out of first-turn instructions. See [`starter/AGENT-ROUTER.md`](starter/AGENT-ROUTER.md).
+An adoption/bootstrap request also persists a concise repository adapter: it merges into or creates the root `AGENTS.md` while preserving nested overlays, and updates `CLAUDE.md` only when that surface is in use. The adapter binds `product_authority`, `operational_ledger`, evidence, resume commands, and stop rules to exact local artifacts while keeping live task state out of first-turn instructions. See [`starter/AGENT-ROUTER.md`](starter/AGENT-ROUTER.md).
 
 For a repository without a durable product specification:
 

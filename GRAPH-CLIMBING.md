@@ -128,7 +128,7 @@ first_probe:
 unknowns:
 ```
 
-When asked to adopt or bootstrap the protocol, persist that resolved map in the repository's native agent instructions before product work. Update an existing `AGENTS.md` non-destructively, or create a concise root file when none exists; update `CLAUDE.md` only when that surface is already used or explicitly requested. Bind abstract terms to exact local artifacts—for example, `.beads/` means the operational ledger is Beads unless another tracker already owns execution. Keep mutable lane IDs, owners, progress, PR state, and dated hot context out of automatically loaded instructions. Audit-only use writes nothing. The merge checklist is [`starter/AGENT-ROUTER.md`](starter/AGENT-ROUTER.md).
+When asked to adopt or bootstrap the protocol, persist that resolved map in the repository's native agent instructions before product work. Merge into the repository-root `AGENTS.md` non-destructively, or create that root file when absent; preserve nested instruction files as scoped overlays. Update `CLAUDE.md` only when that surface is already used or explicitly requested. Bind abstract terms to exact local artifacts—for example, `.beads/` means the operational ledger is Beads unless another tracker already owns execution. Keep mutable lane IDs, owners, progress, PR state, and dated hot context out of automatically loaded instructions. Audit-only use writes nothing. The merge checklist is [`starter/AGENT-ROUTER.md`](starter/AGENT-ROUTER.md).
 
 ## 7. Evidence and reconciliation
 

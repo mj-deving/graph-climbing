@@ -5,7 +5,7 @@ Use this checklist when a user asks to **adopt** or **bootstrap** Graph Climbing
 ## Installation rule
 
 1. Inspect the repository root, nearest instruction files, existing product authority, tracker, Git/evidence layout, and platform conventions.
-2. Update an existing `AGENTS.md` rather than replacing it. If none exists, create one concise root `AGENTS.md`.
+2. Merge into the repository-root `AGENTS.md` rather than replacing it. If the root file is absent, create one concise root `AGENTS.md`; preserve nested `AGENTS.md` files as scoped overlays.
 3. Update or create `CLAUDE.md` only when the repository already uses Claude Code or the user requests that surface. Keep shared rules consistent without duplicating long bodies.
 4. Describe the intended instruction-file changes before writing. Preserve stricter existing rules and surface conflicts.
 5. Keep the adapter stable and short enough for the target loader. Never copy current task IDs, active owners, mutable progress, PR matrices, dated hot context, or recovery procedures into it.

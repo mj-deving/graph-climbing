@@ -33,7 +33,7 @@ The ledger stores what is owed and who owns it. It does not duplicate the detail
 
 ## Repository instruction adapter
 
-An adoption/bootstrap request should make the authority map available to future sessions without depending on chat. Merge the concise checklist in [`starter/AGENT-ROUTER.md`](../starter/AGENT-ROUTER.md) into the repository's native instruction surface. Create `AGENTS.md` only when missing; update `CLAUDE.md` only when that surface is used or requested. The adapter binds exact product authority, optional ledger, evidence, checker, resume, stop, and reconciliation rules. It carries stable routing—not current task IDs, owners, progress, PR state, or dated hot context.
+An adoption/bootstrap request should make the authority map available to future sessions without depending on chat. Merge the concise checklist in [`starter/AGENT-ROUTER.md`](../starter/AGENT-ROUTER.md) into the repository-root `AGENTS.md`, creating that root file when absent and preserving nested instruction files as scoped overlays. Update `CLAUDE.md` only when that surface is used or requested. The adapter binds exact product authority, optional ledger, evidence, checker, resume, stop, and reconciliation rules. It carries stable routing—not current task IDs, owners, progress, PR state, or dated hot context.
 
 If `.beads/` is present and no other tracker owns execution, state explicitly that Beads implements the operational ledger and include live installed claim/read-back commands. This is a repository binding, not a universal Beads dependency.
 

@@ -13,7 +13,7 @@ Do not turn an unresolved product assumption into Out of Scope or a Constraint. 
 
 Use Git and existing tests as the initial evidence store. Start claim-first: derive the claim frontier directly from open criteria whose dependencies are verified. Add a Work Graph and at most one operational ledger only when work must survive long runs, external gates, or concurrent writers.
 
-Persist the resolved authority map in repository-native agent instructions before product work. Follow starter/AGENT-ROUTER.md: update existing AGENTS.md non-destructively or create a concise root file; touch CLAUDE.md only when that surface is used or requested. Bind abstract terms to exact local artifacts. Do not put current task IDs, owners, progress, PR state, or dated hot context in automatically loaded instructions.
+Persist the resolved authority map in repository-native agent instructions before product work. Follow starter/AGENT-ROUTER.md: merge into or create the root AGENTS.md and preserve nested instruction files as scoped overlays; touch CLAUDE.md only when that surface is used or requested. Bind abstract terms to exact local artifacts. Do not put current task IDs, owners, progress, PR state, or dated hot context in automatically loaded instructions.
 
 Before implementation, report:
 - product authority;
