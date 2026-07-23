@@ -103,13 +103,16 @@ test("worker runtime stays task-free and below the native goal limit", async () 
   expect(runtime!.length).toBeLessThan(4_000);
   expect(protocol).toContain(`\`\`\`text\n${runtime}\n\`\`\``);
   expect(runtime).toContain("vertical or companion join");
+  expect(runtime).toContain("first resume any lease already owned by this runtime incarnation");
   expect(runtime).toContain("any applicable epoch");
   expect(runtime).toContain("unique runtime incarnation");
   expect(runtime).toContain("re-read exact ownership, bindings, and barriers");
   expect(runtime).toContain("inactive barriers");
   expect(runtime).toContain("A failed claim re-derives only in a declared multi-worker run");
   expect(runtime).toContain("locally select one bounded frontier item as its lease");
-  expect(runtime).toContain("Apply steering only at a safe boundary");
+  expect(runtime).toContain("At a safe boundary, apply only steering that targets the owned lease");
+  expect(runtime).toContain("Atomically claim ledger steering");
+  expect(runtime).toContain("before closing the steering record");
   expect(runtime).not.toMatch(/\bDACS-standard-|\b[CS]-\d+/);
   expect(runtime).not.toContain("bd update");
   expect(runtime).not.toContain("recovery barrier ID");

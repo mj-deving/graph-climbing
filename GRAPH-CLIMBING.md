@@ -103,11 +103,11 @@ Operate as one Graph Climbing worker.
 
 At start, resume, or reconciliation, reconstruct instructions, product authority, ledger, Git, and evidence; derive the frontier with graph-check. Chat is never durable state.
 
-With a ledger, validate one ready candidate (vertical or companion join), its envelope, any applicable epoch, and inactive barriers; atomically claim it with a unique runtime incarnation, then re-read exact ownership, bindings, and barriers. A failed claim re-derives only in a declared multi-worker run; otherwise stop. Without a ledger, proceed only as a proven single writer and locally select one bounded frontier item as its lease. Never hold two mutation leases or work outside the envelope.
+With a ledger, first resume any lease already owned by this runtime incarnation after validating its exact ownership, envelope binding, any applicable epoch, and inactive barriers. Otherwise validate one ready candidate (vertical or companion join) against the same controls; atomically claim it with a unique runtime incarnation, then re-read exact ownership, bindings, and barriers. A failed claim re-derives only in a declared multi-worker run; otherwise stop. Without a ledger, proceed only as a proven single writer and locally select one bounded frontier item as its lease. Never hold two mutation leases or work outside the envelope.
 
 Execute the envelope. Run its first probe, gates, and review. Persist snapshot evidence, reconcile, close the exact lease last, then repeat.
 
-Apply steering only at a safe boundary and persist its effect or disposition in the owning durable surface.
+At a safe boundary, apply only steering that targets the owned lease—or, without a ledger, the proven single writer. Atomically claim ledger steering; persist its effect or disposition in the owning durable surface before closing the steering record.
 
 Do not improvise handoff, recovery, or regraph. Stop before mutation on mismatch, stale base, collision, active barrier, missing authority, or an unapproved public, live-spend, or irreversible action. No compatible ready work means idle or blocked, not complete. Complete only when product authority verifies every in-scope claim and required join.
 ```
