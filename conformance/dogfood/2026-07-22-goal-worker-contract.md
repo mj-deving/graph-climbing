@@ -307,3 +307,17 @@ Final-bundle review then found the admission set was still implicit: planned non
 ## Falsifiers
 
 The design fails if a worker needs a task name from chat, starts work after losing a claim race, carries two mutating leases, selects from stale frontier state, bypasses a cohort join, edits outside its release envelope, treats no ready work as product completion, or requires a central actor to write a new goal after every vertical.
+
+## 2026-07-23 runtime compression
+
+The first implementation put worker policy, release-owner duties, recovery, epoch replacement, replay, and Beads syntax into one 10,987-character runtime contract. The native Goal surface rejected it at 4,000 characters. More importantly, it required every worker to interpret control-plane procedures that belong to validated graph state, atomic ledger operations, and authorized operators.
+
+The corrected design separates responsibilities:
+
+- the identical worker runtime is 1,100 characters or less and retains only reconstruction, one-lease execution, verification, reconciliation, completion, and fail-closed stop boundaries;
+- the release process makes a vertical Ready only after its complete immutable envelope and compatibility checks exist;
+- the ledger provides atomic ownership and exact close state;
+- handoff, recovery, replay, and epoch replacement remain explicit operator procedures behind barriers;
+- a repository without those guarantees uses a bounded one-shot task or proven serial single-writer profile instead of a larger prompt.
+
+Regression tests enforce byte-identical distributed copies, the runtime budget, absence of concrete task IDs, and absence of embedded ledger-command or recovery-barrier implementation details. Historical review findings above remain provenance for the operator contract; they are not all worker instructions.

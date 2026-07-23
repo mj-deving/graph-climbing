@@ -2,7 +2,7 @@
 
 Graph Climbing came out of a long-running build of DACS Forge, a forkable service template and conformance kit for DACS Agent Commerce.
 
-Status: interim field report. Evidence capture through 2026-07-21. The build is still active.
+Status: interim field report. Evidence capture through 2026-07-22. The build is still active.
 
 This report records what the agents built, how we steered the run, where the control system went too far, and what the inner review loop did after we corrected it. It is not the final Graph Climbing case study, and it is not the DACS Forge engineering case study. DACS Forge is not released, canonically designated, or externally qualified.
 
@@ -138,7 +138,17 @@ The same loop continued after scope recovery:
 - Restart Matrix used six rounds. Fable found two P3 defects after the first clean. The corrected seal passed 685 tests and 44,468 assertions.
 - Concurrent Settlement used three rounds and two independent Bun workers. Codex and Fable finished clean. The reconciled gate passed 689 tests and 44,532 assertions.
 
-The last reconciled product state was `91/165`. Delivery Integrity, positive DACS-5 convergence, negative terminal bundles, bilateral Vet, Doctor Core, loopback readiness, restart boundaries, and concurrent settlement were sealed locally.
+The last reconciled product state before the first parallel pilot was `91/165`. Delivery Integrity, positive DACS-5 convergence, negative terminal bundles, bilateral Vet, Doctor Core, loopback readiness, restart boundaries, and concurrent settlement were sealed locally.
+
+## The first parallel wave converged through one companion
+
+The first released product cohort split two independent closures from common base `62b0e68`: Atomic write hardening and Directory compatibility. Each lane owned a separate workspace and mutation scope. Atomic sealed at `94730de`; Directory sealed at `bef1b96`. Neither seal changed product truth or unlocked ordinary successors.
+
+One pre-created companion then integrated both candidates. The provenance-preserving merge `e5d4d49` produced combined snapshot `2763a71`. Focused Atomic and Directory probes passed, followed by the full repository gate: 768 tests and 51,216 assertions across 55 files, plus typecheck, build, frozen install, evidence validation, and specification completeness. Only that combined reconciliation moved product progress to `95/165`.
+
+The next product-authority revision at `bc60dbc` preserved every stable claim ID and verified evidence while replacing nine broad milestone buckets with 37 atomic claim closures. Every one of the 165 product claims mapped exactly once. That graph exposed a releasable parallel width of two and created the next two lanes plus their companion before either worker started.
+
+This pilot supports a bounded conclusion: isolated evidence candidates can progress concurrently while one companion owns combined verification and truth reconciliation. It does not establish mathematically maximal parallelism, lock-free live regraphing, or a completed DACS Forge release. The second cohort was still in progress at this report boundary.
 
 ## What the “95 percent” observation means
 

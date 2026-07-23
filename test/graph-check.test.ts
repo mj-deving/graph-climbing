@@ -95,6 +95,18 @@ test("goal distribution matches the skill asset", async () => {
   expect(starter).toBe(asset);
 });
 
+test("worker runtime stays small, task-free, and below the native goal limit", async () => {
+  const goal = await Bun.file(new URL("../starter/GOAL.md", import.meta.url)).text();
+  const runtime = goal.match(/```text\n([\s\S]*?)\n```/)?.[1];
+  const protocol = await Bun.file(new URL("../GRAPH-CLIMBING.md", import.meta.url)).text();
+  expect(runtime).toBeDefined();
+  expect(runtime!.length).toBeLessThanOrEqual(1_100);
+  expect(protocol).toContain(`\`\`\`text\n${runtime}\n\`\`\``);
+  expect(runtime).not.toMatch(/\bDACS-standard-|\b[CS]-\d+/);
+  expect(runtime).not.toContain("bd update");
+  expect(runtime).not.toContain("recovery barrier ID");
+});
+
 describe("graph-check", () => {
   test("derives a valid frontier", () => {
     const report = checkSpec(base);

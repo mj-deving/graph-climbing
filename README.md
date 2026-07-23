@@ -43,7 +43,7 @@ For a repository without a durable product specification:
 2. Give the agent [`starter/START.md`](starter/START.md).
 3. From the adopting repository, run `bun /absolute/path/to/graph-climbing/skills/graph-climbing/scripts/graph-check.ts SPEC.md` after the agent fills the claim-first spec.
 
-For a durable `/goal` loop or N parallel workers, give every worker the same [`starter/GOAL.md`](starter/GOAL.md). It contains no current lane: each worker reconstructs durable state, atomically leases one compatible ready vertical, reconciles it, and derives again.
+For a durable `/goal` loop or N parallel workers, give every worker the same compact [`starter/GOAL.md`](starter/GOAL.md) runtime text. It contains no current lane or operator protocol: each worker reconstructs durable state, atomically leases one compatible ready vertical, reconciles it, and derives again. Release, recovery, and epoch mechanics stay in the graph, ledger, and operator procedure.
 
 When working inside this kit checkout, use `bun run graph-check <path-to-spec>` instead.
 
@@ -64,7 +64,7 @@ Add an Execution Graph and one operational ledger only when work must survive lo
 - [`GRAPH-CLIMBING.md`](GRAPH-CLIMBING.md): canonical, standalone protocol and copy-paste prompt.
 - [`docs/terminology.md`](docs/terminology.md): mechanism-specific terminology and source map.
 - [`starter/SPEC.md`](starter/SPEC.md): neutral ISA-inspired specification scaffold.
-- [`starter/GOAL.md`](starter/GOAL.md): identical task-free worker contract for serial or N-way goal runtimes.
+- [`starter/GOAL.md`](starter/GOAL.md): identical task-free worker contract, kept below common native goal limits; system obligations remain outside the prompt.
 - [`starter/CLAIM-CHECKLIST.md`](starter/CLAIM-CHECKLIST.md): atomicity and falsification checks.
 - [`skills/graph-climbing`](skills/graph-climbing/SKILL.md): optional portable skill.
 - `graph-check`: deterministic internal-consistency checker.

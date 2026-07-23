@@ -96,11 +96,21 @@ One climb is deliberately local:
 
 Then derive again. Unreconciled results are candidates, not progress. A climb may close, reopen, or expose unknowns.
 
-For a durable `/goal` runtime, give every worker the same task-free contract:
+For a durable `/goal` runtime, give every worker the same small task-free contract:
 
 ```text
-Operate as one Graph Climbing worker. Reconstruct state at resume and reconciliation. Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch`. Before Ready, the release owner pre-binds every ledger lease to one vertical, envelope hash, workspace, applicable epoch, and recovery barrier ID. Atomic claim binds the unique incarnation; re-read bindings and assume no metadata CAS. Resume requires exact bindings and inactive barrier; handoff proves the old incarnation stopped, no reconciliation is in flight, and acquires its workspace exclusively. Otherwise claim the recovery barrier atomically; losers stop. Its owner freezes claims, stops writers, then replays or dispositions incomplete records on active leases. Replay closes without replacement. Only if work remains may it resolve state, tombstone, and issue a pre-bound lease plus successor barrier; close the barrier last. Owner loss freezes scope for principal recovery; never timeout-steal. Reconciliation owner writes truth in its authority workspace. Recovery is forbidden during live commit-to-close. A ledgerless single writer reconstructs from truth, Git, and evidence. Otherwise derive the frontier. With N writers, claim only from one immutable run epoch published after workers pause or terminate and every lease, seal, reservation, and join reconciles or withdraws. It binds graph/base, explicit `epoch_candidates`, and hashes proven compatible for every pair that can overlap; dependency or own join edges prove non-overlap. Before and after claim verify the applicable epoch, hash, and inactive recovery barrier; mutate nothing on mismatch. Regraph behind the same barrier, then resume unchanged goals. Claim in ledger priority and stable-ID order. N-worker claim losers refresh; a serial race invalidates its profile. Execute and verify the envelope. Reconcile through a snapshot record; when ledger-backed it binds lease ID, hash, and applicable epoch, permits only the active current lease to commit idempotently, then closes that ID with reconciliation and commit references. Ledgerless reconciliation commits product truth and evidence from the record without a ledger. Tombstoned records are superseded. After durable cohort seal, release its worker lease but retain the join reservation; rederive compatible admitted work. No covered claim verifies before join. Claim a join only with integration and checkout authority. Release, derive, and continue. No ready work is not completion. Complete only when durable truth verifies all in-scope claims and joins; stop at unsafe authority, scope, base, gate, public-write, spend, or irreversible-action boundaries.
+Operate as one Graph Climbing worker.
+
+On start, resume, and after reconciliation, reconstruct from repository instructions, product authority, the ledger when present, Git, and evidence. Derive the frontier with the canonical graph check; chat is never durable state.
+
+Atomically claim exactly one ready compatible vertical, then re-read its complete immutable envelope and applicable epoch. Without a ledger, proceed only as a proven single mutating worker. Never hold two mutation leases or work outside the envelope.
+
+Execute the smallest complete vertical. Run its first falsifying probe, required gates, and review. Persist snapshot-bound evidence, reconcile through the canonical procedure, close the exact lease last, then repeat.
+
+Do not improvise handoff, recovery, or regraph. Stop before mutation on mismatch, stale base, collision, active barrier, missing authority, or an unapproved public, live-spend, or irreversible action. No compatible ready work means idle or blocked, not complete. Complete only when product authority verifies every in-scope claim and required join.
 ```
+
+The worker goal states policy, not the coordination implementation. The release process and ledger must make invalid candidates unavailable, bind every ready lease to a complete envelope, and place recovery or epoch changes behind explicit barriers. If that substrate is unavailable, use a bounded one-shot task or proven serial single-writer execution rather than enlarging the prompt. The distributable contract and system boundary are in [`starter/GOAL.md`](starter/GOAL.md).
 
 Before implementation, report:
 

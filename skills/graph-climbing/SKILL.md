@@ -12,7 +12,7 @@ Operate on the repository's durable product authority, optional execution ledger
 - Bootstrap or adopt a work graph: read `references/bootstrap.md`.
 - Audit correctness, frontier, blockers, or parallelism: read `references/audit.md`, then run `scripts/graph-check.ts` when the spec follows the reference format.
 - Reconcile a completed slice, finding, steer, or drift event: read `references/reconcile.md`.
-- Install one task-free contract into a durable goal runtime or N workers: use `assets/GOAL.md` verbatim; keep concrete work in the graph and ledger.
+- Install one task-free contract into a durable goal runtime or N workers: use only the fenced runtime text in `assets/GOAL.md`; keep concrete work and control-plane mechanics in the graph, ledger, and release process.
 
 ## Invariants
 
@@ -32,7 +32,7 @@ Operate on the repository's durable product authority, optional execution ledger
 - Run the inner probe/Autoreview loop per lane and combined probes/review at the companion join. Reconcile cohort completion atomically.
 - After durable lane seal, release its worker's mutating lease but retain the cohort reservation through the join. The worker may claim another ready `epoch_candidates` member only when compatible with every pending reservation; stragglers block their join and dependents, not independent frontiers.
 - When a goal runtime is used, give every worker the same persistent worker contract. Each worker atomically leases at most one compatible mutating vertical, reconciles it, then re-derives and competes for the next graph-ready lease. The goal names no current task.
-- Resolve `serial-no-ledger`, `serial-ledger`, or `N-worker-epoch` before work. Before Ready, pre-bind vertical, envelope hash, workspace, applicable epoch, and one authority-scope recovery barrier ID; atomic claim binds a unique incarnation. Resume requires exact bindings and an inactive barrier. Handoff proves the prior incarnation stopped, no reconciliation is in flight, then exclusively acquires its workspace. Otherwise atomically claim the recovery barrier; losers stop. Its owner freezes claims, stops writers, and first replays or dispositions incomplete records. Only if work remains does it import or disposition all state, tombstone, and issue a pre-bound lease plus successor barrier; close the barrier last. Owner loss is fail-stop: freeze scope for external principal recovery, never timeout-steal. Recovery is forbidden during live commit-to-close.
+- Keep worker and operator responsibilities separate. Workers claim one ready compatible lease, re-read its immutable envelope, execute, verify, reconcile, and close that exact lease last. Release owners pre-bind and validate envelopes before Ready. Recovery, handoff, and epoch replacement are operator procedures behind explicit barriers; ordinary workers stop on mismatch rather than reconstructing those protocols from the goal prompt.
 
 ## Boundaries
 
