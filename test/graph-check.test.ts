@@ -95,6 +95,20 @@ test("goal distribution matches the skill asset", async () => {
   expect(starter).toBe(asset);
 });
 
+test("repository adapter distribution stays identical and stable", async () => {
+  const starter = await Bun.file(new URL("../starter/AGENT-ROUTER.md", import.meta.url)).text();
+  const asset = await Bun.file(new URL("../skills/graph-climbing/assets/AGENT-ROUTER.md", import.meta.url)).text();
+  const protocol = await Bun.file(new URL("../GRAPH-CLIMBING.md", import.meta.url)).text();
+  expect(starter).toBe(asset);
+  expect(starter).toContain("product_authority");
+  expect(starter).toContain("operational_ledger");
+  expect(starter).toContain("When `.beads/` exists");
+  expect(starter).toContain("chat, session transcripts, model memory, and hook summaries");
+  expect(starter).not.toMatch(/\bDACS-standard-|\b[CS]-\d+/);
+  expect(protocol).toContain("persist that resolved map in the repository's native agent instructions");
+  expect(protocol).toContain("Audit-only use writes nothing");
+});
+
 test("worker runtime stays task-free and below the native goal limit", async () => {
   const goal = await Bun.file(new URL("../starter/GOAL.md", import.meta.url)).text();
   const runtime = goal.match(/```text\n([\s\S]*?)\n```/)?.[1];

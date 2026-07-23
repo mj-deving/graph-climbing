@@ -10,6 +10,7 @@ Operate on the repository's durable product authority, optional execution ledger
 ## Route
 
 - Bootstrap or adopt a work graph: read `references/bootstrap.md`.
+- Persist the repository-native authority/ledger adapter during adoption: use `assets/AGENT-ROUTER.md`; audit mode never writes it.
 - Audit correctness, frontier, blockers, or parallelism: read `references/audit.md`, then run `scripts/graph-check.ts` when the spec follows the reference format.
 - Reconcile a completed slice, finding, steer, or drift event: read `references/reconcile.md`.
 - Install one task-free contract into a durable goal runtime or N workers: use only the fenced runtime text in `assets/GOAL.md`; keep concrete work and control-plane mechanics in the graph, ledger, and release process.
@@ -38,6 +39,7 @@ Operate on the repository's durable product authority, optional execution ledger
 
 - Do not require ISA, Beads, a goal runtime, hooks, dashboards, or continuous supervision. When several mutating workers run, require one atomic operational ledger even though its implementation remains optional.
 - Do not overwrite an existing specification during bootstrap.
+- Do not overwrite repository instructions; merge a concise stable adapter and preserve stricter existing rules.
 - Do not turn a task ledger into a second product specification.
 - Do not automatically close claims, execute irreversible actions, publish, or repair audit findings.
 - Do not recursively harden governance or this skill during product work.

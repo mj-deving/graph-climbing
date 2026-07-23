@@ -31,6 +31,12 @@ No ledger is needed for short serial work. Add one when ownership, debt, externa
 
 The ledger stores what is owed and who owns it. It does not duplicate the detailed product criteria. Beads, GitHub Issues, Linear, or an existing project tracker may serve this role.
 
+## Repository instruction adapter
+
+An adoption/bootstrap request should make the authority map available to future sessions without depending on chat. Merge the concise checklist in [`starter/AGENT-ROUTER.md`](../starter/AGENT-ROUTER.md) into the repository's native instruction surface. Create `AGENTS.md` only when missing; update `CLAUDE.md` only when that surface is used or requested. The adapter binds exact product authority, optional ledger, evidence, checker, resume, stop, and reconciliation rules. It carries stable routing—not current task IDs, owners, progress, PR state, or dated hot context.
+
+If `.beads/` is present and no other tracker owns execution, state explicitly that Beads implements the operational ledger and include live installed claim/read-back commands. This is a repository binding, not a universal Beads dependency.
+
 ## Optional Work Graph profile
 
 Add a `Work Graph` only when a run is long, an external gate must survive context loss, or multiple workers need durable ownership. In this profile, `active_frontier` contains executable verticals and `frontier_kind` is `vertical`.

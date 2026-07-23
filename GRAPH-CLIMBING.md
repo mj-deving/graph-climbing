@@ -128,6 +128,8 @@ first_probe:
 unknowns:
 ```
 
+When asked to adopt or bootstrap the protocol, persist that resolved map in the repository's native agent instructions before product work. Update an existing `AGENTS.md` non-destructively, or create a concise root file when none exists; update `CLAUDE.md` only when that surface is already used or explicitly requested. Bind abstract terms to exact local artifacts—for example, `.beads/` means the operational ledger is Beads unless another tracker already owns execution. Keep mutable lane IDs, owners, progress, PR state, and dated hot context out of automatically loaded instructions. Audit-only use writes nothing. The merge checklist is [`starter/AGENT-ROUTER.md`](starter/AGENT-ROUTER.md).
+
 ## 7. Evidence and reconciliation
 
 Evidence names its snapshot and observation. Match modality to claim; source inspection cannot prove runtime behavior.
@@ -174,11 +176,12 @@ Common failures:
 Start now:
 
 1. Inspect instructions, authorities, Git, evidence, pins.
-2. Name authorities. Adopt an adequate product authority; create a native spec only when none exists.
-3. Preserve intent, boundaries, claims, dependencies, probes, status, decisions, evidence. Keep unresolved semantics `unknown` outside the frontier.
-4. Derive and report `claim_frontier`, `frontier_kind`, and `active_frontier`.
-5. Select a bounded vertical and first falsifying probe. Add no ledger unless scaling conditions exist.
-6. Climb, reconcile, and derive again while work remains.
+2. Name authorities. On adoption/bootstrap, persist their exact repository-native mapping in agent instructions; create no competing instruction body or live-state chronicle.
+3. Adopt an adequate product authority; create a native spec only when none exists.
+4. Preserve intent, boundaries, claims, dependencies, probes, status, decisions, evidence. Keep unresolved semantics `unknown` outside the frontier.
+5. Derive and report `claim_frontier`, `frontier_kind`, and `active_frontier`.
+6. Select a bounded vertical and first falsifying probe. Add no ledger unless scaling conditions exist.
+7. Climb, reconcile, and derive again while work remains.
 
 Graph Climbing is failing when operators cannot reconstruct the frontier, claims close without matching evidence, review findings change truth without verification, spec and ledger compete, coordination costs more than parallel work returns, or an agent must remember state absent from durable artifacts. Track closure, reopens, authority divergence, frontier latency, review yield, governance overhead. Change when justified.
 
