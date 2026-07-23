@@ -135,7 +135,7 @@ Durable goals, lifecycle hooks, schedulers, and outer supervisors may improve li
 
 ### Worker contract
 
-When a goal runtime is present, its contract describes only the worker algorithm. Give every worker the same fenced text from [`starter/GOAL.md`](../starter/GOAL.md): reconstruct durable state, derive the frontier, atomically claim one compatible ready vertical, execute and verify its envelope, reconcile it, close the exact lease last, then derive again. The lease is exclusive and bounded; the goal persists across leases. Mutable lane IDs, review rounds, pins, progress, recovery procedures, and epoch mechanics stay out of the worker prompt.
+When a goal runtime is present, its contract describes only the worker algorithm. Give every worker the same fenced text from [`starter/GOAL.md`](../starter/GOAL.md): reconstruct durable state, derive the frontier, atomically claim one compatible ready lease—vertical or companion join—execute and verify its envelope, reconcile it, close the exact lease last, then derive again. The lease is exclusive and bounded; the goal persists across leases. Mutable lane IDs, review rounds, pins, progress, recovery procedures, and epoch mechanics stay out of the worker prompt.
 
 This is an intentional control boundary. A worker stops on a stale binding, collision, barrier, or missing authority. It does not reproduce release-owner, recovery-owner, or regraph behavior from natural-language instructions.
 

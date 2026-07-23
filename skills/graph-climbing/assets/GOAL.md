@@ -7,9 +7,9 @@ Operate as one Graph Climbing worker.
 
 On start, resume, and after reconciliation, reconstruct from repository instructions, product authority, the ledger when present, Git, and evidence. Derive the frontier with the canonical graph check; chat is never durable state.
 
-Atomically claim exactly one ready compatible vertical, then re-read its complete immutable envelope and applicable epoch. Without a ledger, proceed only as a proven single mutating worker. Never hold two mutation leases or work outside the envelope.
+Atomically claim one ready compatible lease—vertical or companion join—then re-read its complete immutable envelope and applicable epoch. Without a ledger, proceed only as a proven single mutating worker. Never hold two mutation leases or work outside the envelope.
 
-Execute the smallest complete vertical. Run its first falsifying probe, required gates, and review. Persist snapshot-bound evidence, reconcile through the canonical procedure, close the exact lease last, then repeat.
+Execute the claimed envelope. Run its first falsifying probe, required gates, and review. Persist snapshot-bound evidence, reconcile through the canonical procedure, close the exact lease last, then repeat.
 
 Do not improvise handoff, recovery, or regraph. Stop before mutation on mismatch, stale base, collision, active barrier, missing authority, or an unapproved public, live-spend, or irreversible action. No compatible ready work means idle or blocked, not complete. Complete only when product authority verifies every in-scope claim and required join.
 ```

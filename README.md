@@ -43,7 +43,7 @@ For a repository without a durable product specification:
 2. Give the agent [`starter/START.md`](starter/START.md).
 3. From the adopting repository, run `bun /absolute/path/to/graph-climbing/skills/graph-climbing/scripts/graph-check.ts SPEC.md` after the agent fills the claim-first spec.
 
-For a durable `/goal` loop or N parallel workers, give every worker the same compact [`starter/GOAL.md`](starter/GOAL.md) runtime text. It contains no current lane or operator protocol: each worker reconstructs durable state, atomically leases one compatible ready vertical, reconciles it, and derives again. Release, recovery, and epoch mechanics stay in the graph, ledger, and operator procedure.
+For a durable `/goal` loop or N parallel workers, give every worker the same compact [`starter/GOAL.md`](starter/GOAL.md) runtime text. It contains no current lane or operator protocol: each worker reconstructs durable state, atomically claims one compatible ready vertical or companion join, reconciles it, and derives again. Release, recovery, and epoch mechanics stay in the graph, ledger, and operator procedure.
 
 When working inside this kit checkout, use `bun run graph-check <path-to-spec>` instead.
 

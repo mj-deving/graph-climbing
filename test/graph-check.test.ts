@@ -102,6 +102,7 @@ test("worker runtime stays small, task-free, and below the native goal limit", a
   expect(runtime).toBeDefined();
   expect(runtime!.length).toBeLessThanOrEqual(1_100);
   expect(protocol).toContain(`\`\`\`text\n${runtime}\n\`\`\``);
+  expect(runtime).toContain("vertical or companion join");
   expect(runtime).not.toMatch(/\bDACS-standard-|\b[CS]-\d+/);
   expect(runtime).not.toContain("bd update");
   expect(runtime).not.toContain("recovery barrier ID");
