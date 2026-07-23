@@ -109,7 +109,7 @@ test("worker runtime stays task-free and below the native goal limit", async () 
   expect(runtime).toContain("re-read exact ownership, bindings, and barriers");
   expect(runtime).toContain("inactive barriers");
   expect(runtime).toContain("A failed claim re-derives only in a declared multi-worker run");
-  expect(runtime).toContain("locally select one bounded frontier item as its lease");
+  expect(runtime).toContain("locally select one bounded frontier item with a complete envelope as its lease");
   expect(runtime).toContain("At a safe boundary, apply only steering that targets the owned lease");
   expect(runtime).toContain("Atomically claim ledger steering");
   expect(runtime).toContain("before closing the steering record");

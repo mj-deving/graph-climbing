@@ -314,7 +314,7 @@ The first implementation put worker policy, release-owner duties, recovery, epoc
 
 The corrected design separates responsibilities:
 
-- the identical worker runtime stays below the native 4,000-character limit and retains reconstruction, same-incarnation lease resume, applicable-epoch, barrier, incarnation-bound and profile-aware ledger validation, ledgerless bounded local selection, lease-targeted atomic safe-boundary steering, one-lease execution, verification, reconciliation, completion, and fail-closed stop boundaries;
+- the identical worker runtime stays below the native 4,000-character limit and retains reconstruction, complete envelopes for both execution profiles, same-incarnation lease resume, applicable-epoch, barrier, incarnation-bound and profile-aware ledger validation, ledgerless bounded local selection, lease-targeted atomic safe-boundary steering, one-lease execution, verification, reconciliation, completion, and fail-closed stop boundaries;
 - the release process makes a work item—vertical or companion join—Ready only after its complete immutable envelope and compatibility checks exist;
 - the ledger provides atomic ownership and exact close state;
 - handoff, recovery, replay, and epoch replacement remain explicit operator procedures behind barriers;
